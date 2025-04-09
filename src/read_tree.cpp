@@ -8,17 +8,17 @@
 
 const size_t BUFFER_SIZE = 10;
 
-Node* NewNode(NodeType type, double content, Node* left, Node* right);
+Node* NewNode(NodeType type, NodeValue value, Node* left, Node* right);
 NodeType DetectNodeType(const char *str);
 CodeError CreateNode(Node **dest, const char *data, Node *parent);
 
-Node* NewNode(NodeType type, double content, Node* left, Node* right)
+Node* NewNode(NodeType type, NodeValue value, Node* left, Node* right)
 {
     Node* node = (Node*)calloc(1, sizeof(Node));
     if (!node) return nullptr;
 
     node->type = type;
-    node->value = content;
+    node->value = value;
 
     node->left = left;
     node->right = right;
@@ -35,26 +35,49 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
         return INVALID_ARGUMENT;
 
     NodeType type = DetectNodeType(data);
-    int content = 0;
+    NodeValue value;
 
     switch (type)
     {
         case OP:
+        {
+            bool found = false;
+            for (size_t i = 0; i < sizeof(operations)/sizeof(operations[0]); i++)
+            {
+                if (strcmp(data, operations[i].symbol) == 0)
+                {
+                    value.op.op = operations[i].op;
+                    value.op.symbol = operations[i].symbol;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return INVALID_OPERATION;
+            break;
+        }
+
         case VAR:
-            content = (int)data[0];
+            value.var = (size_t)data[0];
             break;
+
         case NUM:
-            content = atoi(data);
+            value.num = atof(data);
             break;
+
         default:
-            break;
+            return INVALID_NODE_TYPE;
     }
 
-    Node* node = NewNode(type, content, nullptr, nullptr);
+    Node* node = (Node*)malloc(sizeof(Node));
     if (!node)
         return MEM_ALLOC_FAIL;
 
+    node->type = type;
+    node->value = value;
+    node->left = nullptr;
+    node->right = nullptr;
     node->parent = parent;
+
     *dest = node;
     return OK;
 }

@@ -10,7 +10,7 @@ CXXFLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-l
            -flto-odr-type-merging -fno-omit-frame-pointer -Wstack-usage=8192 -pie -fPIE -Werror=vla                                                     \
            -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
-SOURCES = src/main.cpp src/read_tree.cpp src/graph_dump.cpp
+SOURCES = src/main.cpp src/read_tree.cpp src/graph_dump.cpp src/diff_tree.cpp
 INCLUDES = -I./include
 
 OBJECTS = $(SOURCES:%.cpp=build/%.o)

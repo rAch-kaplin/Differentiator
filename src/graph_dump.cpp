@@ -18,11 +18,13 @@ const char* GetNodeLabel(const Node* node)
     switch (node->type)
     {
         case NUM:
-            snprintf(label, sizeof(label), "%lg", node->value);
+            snprintf(label, sizeof(label), "%lg", node->value.num);
             break;
         case VAR:
+            snprintf(label, sizeof(label), "%c", node->value.var);
+            break;
         case OP:
-            snprintf(label, sizeof(label), "%c", (char)node->value);
+            snprintf(label, sizeof(label), "%s", node->value.op.symbol);
             break;
         default:
             break;

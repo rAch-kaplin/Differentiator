@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "read_tree.h"
+#include "diff_tree.h"
 
 int main()
 {
@@ -33,6 +34,7 @@ int main()
 
     //TreeDumpDot(root);
     TreeDumpDot2(root);
+    printf("%lg\n", Eval(root));
 
     FreeTree(&root);
 
