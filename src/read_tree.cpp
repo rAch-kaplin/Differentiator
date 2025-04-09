@@ -8,7 +8,6 @@
 
 const size_t BUFFER_SIZE = 10;
 
-Node* NewNode(NodeType type, NodeValue value, Node* left, Node* right);
 NodeType DetectNodeType(const char *str);
 CodeError CreateNode(Node **dest, const char *data, Node *parent);
 
@@ -82,16 +81,14 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
     return OK;
 }
 
-void FreeTree(Node **root)
+void FreeTree(Node* node)
 {
-    if (root == nullptr || *root == nullptr)
-        return;
+    if (!node) return;
 
-    FreeTree(&((*root)->left));
-    FreeTree(&((*root)->right));
-
-    free(*root);
-    *root = nullptr;
+    FreeTree(node->left);
+    FreeTree(node->right);
+    free(node);
+    node = nullptr;
 }
 
 size_t GetSizeFile(FILE *name_base)
@@ -214,7 +211,7 @@ void ParseMathExpr(Node **node, char **buffer, Node *parent)
     if (**buffer != ')')
     {
         fprintf(stderr, "Expected ')' after operator subtree\n");
-        FreeTree(node);
+        FreeTree(*node);
         return;
     }
 

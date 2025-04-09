@@ -24,7 +24,6 @@ enum NodeType
 enum Op
 {
     ADD, SUB, MUL, DIV,
-
 };
 
 typedef struct Operation
@@ -62,7 +61,7 @@ static const Operation operations[] =
 size_t GetSizeFile(FILE *name_base);
 char *ReadFileToBuffer(const char *name_base, size_t *file_size);
 void ParseMathExpr(Node **node, char **buffer, Node *parent);
-void FreeTree(Node **root);
+void FreeTree(Node *root);
 CodeError TreeDumpDot(Node* root);
 CodeError TreeDumpDot2(Node* root);
 

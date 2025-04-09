@@ -36,7 +36,13 @@ int main()
     TreeDumpDot2(root);
     printf("%lg\n", Eval(root));
 
-    FreeTree(&root);
+    Node *c_node = CopyTree(root);
+    Node *d_node = Diff(c_node);
+    TreeDumpDot2(d_node);
+
+    FreeTree(d_node);
+    FreeTree(c_node);
+    FreeTree(root);
 
     printf("End main!\n");
 }
