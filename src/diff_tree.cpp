@@ -7,18 +7,14 @@
 
 const double EPSILON = 1e-10;
 
-Node* MakeOpNode(Op op, Node* left, Node* right)
-{
-    NodeValue val = {};
-    val.op = operations[op];
-    return NewNode(OP, val, left, right);
-}
-
 #define _NUM(n) NewNode(NUM, (NodeValue){.num = (n)}, nullptr, nullptr)
-#define _VAR(x) NewNode(VAR, (NodeValue){.var = (x)}, nullptr, nullptr)
 
-#define _ADD(a, b) MakeOpNode(ADD, a, b)
-#define _MUL(a, b) MakeOpNode(MUL, a, b)
+//--------------------------------------
+#define OP_VALUE(oper) NodeValue {.op = (oper)}
+
+#define _ADD(a,b) NewNode(OP, OP_VALUE(ADD), a, b)
+#define _MUL(a,b) NewNode(OP, OP_VALUE(MUL), a, b)
+//--------------------------------------
 
 #define dL  Diff(node->left)
 #define dR  Diff(node->right)
@@ -33,7 +29,7 @@ double Eval(Node *node)
     if (node->type == VAR) return Global_x;
     if (node->type == OP)
     {
-        switch (node->value.op.op)
+        switch (node->value.op)
         {
             case ADD: return Eval(node->left) + Eval(node->right);
             case SUB: return Eval(node->left) - Eval(node->right);
@@ -79,7 +75,7 @@ Node* Diff(Node *node)
     if (node->type == VAR) return _NUM(1);
     if (node->type == OP)
     {
-        switch (node->value.op.op)
+        switch (node->value.op)
         {
             case ADD: return _ADD(dL, dR);
             case MUL: return _ADD(_MUL(dL, CR), _MUL(CL, dR));

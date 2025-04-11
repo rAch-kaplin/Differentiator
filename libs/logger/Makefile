@@ -10,37 +10,22 @@ CXXFLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-l
            -flto-odr-type-merging -fno-omit-frame-pointer -Wstack-usage=8192 -pie -fPIE -Werror=vla                                                     \
            -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
-LIB_LOGGER_DIR = libs/logger
-LIB_LOGGER = $(LIB_LOGGER_DIR)/build/logger.o
+SOURCES = logger.cpp
+INCLUDES =
 
-SOURCES = src/main.cpp src/read_tree.cpp src/graph_dump.cpp src/diff_tree.cpp
-INCLUDES = -I./include -I$(LIB_LOGGER_DIR)
-
-OBJECTS = $(SOURCES:%.cpp=build/%.o) $(LIB_LOGGER)
+OBJECTS = $(SOURCES:%.cpp=build/%.o)
 
 DEPENDS = $(OBJECTS:.o=.d)
 
 .PHONY: all
-all: $(LIB_LOGGER) do.exe
-	@echo -e "\033[33mCompilation complete.\033[0m"
+all: build/logger.o
+	@echo -e "\033[33mLogger compiled.\033[0m"
 
-do.exe: $(OBJECTS)
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o do
-
-$(LIB_LOGGER):
-	@$(MAKE) -C $(LIB_LOGGER_DIR)
-
-build/%.o: %.cpp
+build/logger.o: logger.cpp
 	@mkdir -p $(dir $@)
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
+	@$(CXX) $(CXXFLAGS) -MP -MMD -c $< -o $@
 
 -include $(DEPENDS)
-#
-# .PHONY: clean
-# clean:
-# 	rm -rf do.exe build $(DEPENDS)
 
-.PHONY: clean
 clean:
-	rm -rf do.exe build $(DEPENDS)
-	@$(MAKE) -C $(LIB_LOGGER_DIR) clean
+	rm -rf build

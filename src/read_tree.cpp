@@ -41,12 +41,12 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
         case OP:
         {
             bool found = false;
-            for (size_t i = 0; i < sizeof(operations)/sizeof(operations[0]); i++)
+            for (size_t i = 0; i < sizeof(operations) / sizeof(operations[0]); i++)
             {
                 if (strcmp(data, operations[i].symbol) == 0)
                 {
-                    value.op.op = operations[i].op;
-                    value.op.symbol = operations[i].symbol;
+                    value.op = operations[i].op;
+                    //value.op.symbol = operations[i].symbol;
                     found = true;
                     break;
                 }

@@ -18,7 +18,7 @@ enum NodeType
 {
     OP,
     NUM,
-    VAR
+    VAR,
 };
 
 enum Op
@@ -35,7 +35,7 @@ typedef struct Operation
 union NodeValue
 {
     double num;
-    Operation op;
+    Op op;
     int var;
 };
 

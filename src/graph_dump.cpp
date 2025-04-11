@@ -6,6 +6,8 @@
 
 #include "read_tree.h"
 
+const size_t size_op = 32;
+
 int GenerateGraph(Node* node, char* buffer, int* buffer_len, const size_t BUFFER_SIZE);
 const char* GetNodeLabel(const Node* node);
 const char* GetNodeColor(const Node* node);
@@ -13,7 +15,7 @@ int GenerateGraph2(Node* node, char* buffer, int* buffer_len, const size_t BUFFE
 
 const char* GetNodeLabel(const Node* node)
 {
-    static char label[32]; //FIXME
+    static char label[size_op];
 
     switch (node->type)
     {
@@ -24,10 +26,24 @@ const char* GetNodeLabel(const Node* node)
             snprintf(label, sizeof(label), "%c", node->value.var);
             break;
         case OP:
-            snprintf(label, sizeof(label), "%s", node->value.op.symbol);
+        {
+            const char* op_symbol = NULL;
+            for (size_t i = 0; i < sizeof(operations)/sizeof(operations[0]); i++)
+            {
+                if (operations[i].op == node->value.op)
+                {
+                    op_symbol = operations[i].symbol;
+                    break;
+                }
+            }
+            snprintf(label, sizeof(label), "%s", op_symbol ? op_symbol : "?");
             break;
+        }
         default:
+        {
+            snprintf(label, sizeof(label), "UNKNOWN");
             break;
+        }
     }
 
     return label;
@@ -169,7 +185,7 @@ CodeError TreeDumpDot2(Node* root)
     int buffer_len = snprintf(buffer, BUFFER_SIZE,
         "digraph G {\n"
         "\trankdir=HR;\n"
-        "\tbgcolor=\"#F7F9FB\";\n"
+        "\tbgcolor=\"#ebf7fa\";\n"
         "\tnode [fontname=\"Arial\", fontsize=12];\n");
 
     GenerateGraph2(root, buffer, &buffer_len, BUFFER_SIZE);
