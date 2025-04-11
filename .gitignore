@@ -1,2 +1,5 @@
 do.exe
 do
+logfile.log
+exprt.txt
+graphiz/dot

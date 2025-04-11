@@ -49,6 +49,19 @@ const char* GetNodeLabel(const Node* node)
     return label;
 }
 
+const char* GetNodeColor(const Node* node)
+{
+    assert(node != nullptr);
+
+    switch (node->type)
+    {
+        case NUM:    return "#ff9a8d";
+        case VAR:    return "#7e8aab";
+        case OP:     return "#aed6dc";
+        default:     return "#ffffff";
+    }
+}
+
 CodeError TreeDumpDot(Node* root)
 {
     static int dump_counter = 0;
@@ -66,13 +79,13 @@ CodeError TreeDumpDot(Node* root)
     buffer_len += snprintf(buffer + buffer_len, BUFFER_SIZE - (size_t)buffer_len,
                            "digraph G {\n"
                            "\trankdir = HR;\n"
-                           "\tbgcolor=\"#fcf0d2\";\n");
+                           "\tbgcolor=\"#ebf7fa\";\n");
 
     GenerateGraph(root, buffer, &buffer_len, BUFFER_SIZE);
 
     buffer_len += snprintf(buffer + buffer_len, BUFFER_SIZE - (size_t)buffer_len, "}\n");
 
-    FILE* file = fopen("dump.dot", "w+");
+    FILE* file = fopen("graphiz/dot/dump.dot", "w+");
     if (!file)
     {
         fprintf(stderr, "Cannot open dot file\n");
@@ -85,10 +98,10 @@ CodeError TreeDumpDot(Node* root)
     free(buffer);
 
     char png_filename[PNG_NAME_SIZE];
-    snprintf(png_filename, sizeof(png_filename), "dump_%d.png", dump_counter++);
+    snprintf(png_filename, sizeof(png_filename), "graphiz/img/dump_%d.png", dump_counter++);
 
     char command[256];
-    snprintf(command, sizeof(command), "dot -Tpng dump.dot -o %s", png_filename);
+    snprintf(command, sizeof(command), "dot -Tpng graphiz/dot/dump.dot -o %s", png_filename);
     system(command);
 
     return OK;
@@ -99,50 +112,39 @@ int GenerateGraph(Node* node, char* buffer, int* buffer_len, const size_t BUFFER
     if (!node) return 0;
 
     const char* label = GetNodeLabel(node);
+    const char* color = GetNodeColor(node);
 
     *buffer_len += snprintf(buffer + *buffer_len, BUFFER_SIZE - (size_t)*buffer_len,
-        "\t             node%p [shape=plaintext; style=filled; color=\"#fcf0d2\"; label = <\n"
-        "\t\t                     <table border=\"0\" cellborder=\"1\" cellspacing=\"0\" cellpadding=\"6\" bgcolor=\"#bfb58f\" color=\"#4d3d03\">\n"
+        "\t             node%p [shape=plaintext; style=filled; label = <\n"
+        "\t\t                     <table border=\"0\" cellborder=\"1\" cellspacing=\"0\" cellpadding=\"6\" bgcolor=\"%s\" color=\"#4d3d03\">\n"
         "\t\t\t                   <tr><td align='center' colspan='2'><FONT COLOR='#3a3a3a'><b>Node: %p</b></FONT></td></tr>\n"
+        "\t\t\t                   <tr><td align='center' colspan='2'><FONT COLOR='#3a3a3a'><b>Parent: %p</b></FONT></td></tr>\n"
         "\t\t\t                   <tr><td align='center' colspan='2'><FONT COLOR='#3a3a3a'><b>Type: %s</b></FONT></td></tr>\n"
-        "\t\t\t                   <tr><td align='center' colspan='2'><FONT COLOR='#ba6504'>Val: <b>%s</b></FONT></td></tr>\n"
+        "\t\t\t                   <tr><td align='center' colspan='2'><FONT COLOR='#3a3a3a'><b>%s</b></FONT></td></tr>\n"
         "\t\t\t                   <tr>\n"
-        "\t\t\t\t                     <td WIDTH='150' PORT='left' align='center'><FONT COLOR='#006400'><b>Left: %p</b></FONT></td>\n"
-        "\t\t\t\t                     <td WIDTH='150' PORT='right' align='center'><FONT COLOR='#8b0000'><b>Right: %p</b></FONT></td>\n"
+        "\t\t\t\t                     <td WIDTH='150' PORT='left' align='center'><FONT COLOR='#3a3a3a'><b>Left: %p</b></FONT></td>\n"
+        "\t\t\t\t                     <td WIDTH='150' PORT='right' align='center'><FONT COLOR='#3a3a3a'><b>Right: %p</b></FONT></td>\n"
         "\t\t\t                   </tr>\n"
         "\t\t                     </table> >];\n",
-        node, node, (node->type == OP ? "OP" : (node->type == NUM ? "NUM" : "VAR")), label, node->left, node->right);
+        node, color, node, node->parent, (node->type == OP ? "OP" : (node->type == NUM ? "NUM" : "VAR")), label, node->left, node->right);
 
     if (node->left)
     {
         *buffer_len += GenerateGraph(node->left, buffer, buffer_len, BUFFER_SIZE);
         *buffer_len += snprintf(buffer + *buffer_len, BUFFER_SIZE - (size_t)*buffer_len,
-                                "\tnode%p:left -> node%p [color=\"#006400\" style=bold; weight=1000];\n",
-                                node, node->left);
+                                "\tnode%p:left -> node%p [color=\"%s\" style=bold; weight=1000];\n",
+                                node, node->left, color);
     }
 
     if (node->right)
     {
         *buffer_len += GenerateGraph(node->right, buffer, buffer_len, BUFFER_SIZE);
         *buffer_len += snprintf(buffer + *buffer_len, BUFFER_SIZE - (size_t)*buffer_len,
-                                "\tnode%p:right -> node%p [color=\"#8b0000\" style=bold; weight=1000];\n",
-                                node, node->right);
+                                "\tnode%p:right -> node%p [color=\"%s\" style=bold; weight=1000];\n",
+                                node, node->right, color);
     }
 
     return 0;
-}
-
-const char* GetNodeColor(const Node* node)
-{
-    assert(node != nullptr);
-
-    switch (node->type)
-    {
-        case NUM:    return "#ff9a8d";
-        case VAR:    return "#4a536b";
-        case OP:     return "#aed6dc";
-        default:     return "#ffffff";
-    }
 }
 
 int GenerateGraph2(Node* node, char* buffer, int* buffer_len, const size_t BUFFER_SIZE)
@@ -160,16 +162,16 @@ int GenerateGraph2(Node* node, char* buffer, int* buffer_len, const size_t BUFFE
     {
         *buffer_len += GenerateGraph2(node->left, buffer, buffer_len, BUFFER_SIZE);
         *buffer_len += snprintf(buffer + *buffer_len, BUFFER_SIZE - (size_t)*buffer_len,
-            "\tnode%p -> node%p [style=bold; weight=1000;];\n",
-            node, node->left);
+            "\tnode%p -> node%p [color=\"%s\"; style=bold;  weight=1000;];\n",
+            node, node->left, color);
     }
 
     if (node->right)
     {
         *buffer_len += GenerateGraph2(node->right, buffer, buffer_len, BUFFER_SIZE);
         *buffer_len += snprintf(buffer + *buffer_len, BUFFER_SIZE - (size_t)*buffer_len,
-            "\tnode%p -> node%p [style=bold; weight=1000;];\n",
-            node, node->right);
+            "\tnode%p -> node%p [color=\"%s\"; style=bold; weight=1000;];\n",
+            node, node->right, color);
     }
 
     return 0;
@@ -192,7 +194,7 @@ CodeError TreeDumpDot2(Node* root)
     buffer_len += snprintf(buffer + buffer_len, BUFFER_SIZE - (size_t)buffer_len, "}\n");
 
 
-    FILE* file = fopen("dump2.dot", "w+");
+    FILE* file = fopen("graphiz/dot/dump2.dot", "w+");
     if (!file)
     {
         fprintf(stderr, "Cannot open dot file\n");
@@ -205,10 +207,10 @@ CodeError TreeDumpDot2(Node* root)
     free(buffer);
 
     char png_name[64];
-    snprintf(png_name, sizeof(png_name), "dump2_%d.png", dump_counter++);
+    snprintf(png_name, sizeof(png_name), "graphiz/img/dump2_%d.png", dump_counter++);
 
     char command[128];
-    snprintf(command, sizeof(command), "dot -Tpng dump2.dot -o %s", png_name);
+    snprintf(command, sizeof(command), "dot -Tpng graphiz/dot/dump2.dot -o %s", png_name);
     system(command);
 
     return OK;

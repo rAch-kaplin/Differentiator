@@ -4,22 +4,22 @@
 
 #include "read_tree.h"
 #include "diff_tree.h"
+#include "logger.h"
 
 const double EPSILON = 1e-10;
 
 #define _NUM(n) NewNode(NUM, (NodeValue){.num = (n)}, nullptr, nullptr)
 
-//--------------------------------------
 #define OP_VALUE(oper) NodeValue {.op = (oper)}
 
 #define _ADD(a,b) NewNode(OP, OP_VALUE(ADD), a, b)
 #define _MUL(a,b) NewNode(OP, OP_VALUE(MUL), a, b)
-//--------------------------------------
 
 #define dL  Diff(node->left)
 #define dR  Diff(node->right)
 #define CL  CopyTree(node->left)
 #define CR  CopyTree(node->right)
+
 
 double Eval(Node *node)
 {
@@ -39,19 +39,19 @@ double Eval(Node *node)
                 double right = Eval(node->right);
                 if (fabs(right) < EPSILON)
                 {
-                    fprintf(stderr, "Error: Division by zero\n");
+                    LOG(LOGL_ERROR, "Error: Division by zero");
                     return NAN;
                 }
                 return Eval(node->left) / right;
             }
 
             default:
-                fprintf(stderr, "Error: Unknown operation\n");
+                LOG(LOGL_ERROR,"Error: Unknown operation");
                 return NAN;
         }
     }
 
-    fprintf(stderr, "Error: Unknown node type\n");
+    LOG(LOGL_ERROR, "Error: Unknown node type");
     return NAN;
 }
 
@@ -80,7 +80,7 @@ Node* Diff(Node *node)
             case ADD: return _ADD(dL, dR);
             case MUL: return _ADD(_MUL(dL, CR), _MUL(CL, dR));
 
-             default: fprintf(stderr, "ERROR: Unknown operation for differentiator\n");
+             default: LOG(LOGL_ERROR, "ERROR: Unknown operation for differentiator");
                      break;
         }
     }

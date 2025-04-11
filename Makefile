@@ -13,7 +13,7 @@ CXXFLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-l
 LIB_LOGGER_DIR = libs/logger
 LIB_LOGGER = $(LIB_LOGGER_DIR)/build/logger.o
 
-SOURCES = src/main.cpp src/read_tree.cpp src/graph_dump.cpp src/diff_tree.cpp
+SOURCES = src/main.cpp src/read_tree.cpp graphiz/graph_dump.cpp src/diff_tree.cpp
 INCLUDES = -I./include -I$(LIB_LOGGER_DIR)
 
 OBJECTS = $(SOURCES:%.cpp=build/%.o) $(LIB_LOGGER)
@@ -35,10 +35,6 @@ build/%.o: %.cpp
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
 
 -include $(DEPENDS)
-#
-# .PHONY: clean
-# clean:
-# 	rm -rf do.exe build $(DEPENDS)
 
 .PHONY: clean
 clean:

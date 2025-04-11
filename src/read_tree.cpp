@@ -5,6 +5,8 @@
 #include <ctype.h>
 
 #include "read_tree.h"
+#include "diff_tree.h"
+#include "logger.h"
 
 const size_t BUFFER_SIZE = 10;
 
@@ -46,7 +48,6 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
                 if (strcmp(data, operations[i].symbol) == 0)
                 {
                     value.op = operations[i].op;
-                    //value.op.symbol = operations[i].symbol;
                     found = true;
                     break;
                 }
@@ -105,7 +106,7 @@ char *ReadFileToBuffer(const char *name_base, size_t *file_size)
     FILE *base_file = fopen(name_base, "r");
     if (base_file == nullptr)
     {
-        //LOG(LOGL_ERROR, "Can't open file: %s", name_base);
+        LOG(LOGL_ERROR, "Can't open file: %s", name_base);
         return nullptr;
     }
 
@@ -113,7 +114,7 @@ char *ReadFileToBuffer(const char *name_base, size_t *file_size)
     char *buffer = (char*)calloc(*file_size + 1, sizeof(char));
     if (buffer == nullptr)
     {
-        //LOG(LOGL_ERROR, "Memory allocation failed");
+        LOG(LOGL_ERROR, "Memory allocation failed");
         fclose(base_file);
         return nullptr;
     }
@@ -139,7 +140,7 @@ NodeType DetectNodeType(const char *str)
     {
         char ch = str[0];
 
-        if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^')
+        if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^') //FIXME
             return OP;
 
         if (isalpha(ch))
@@ -164,12 +165,12 @@ void ParseMathExpr(Node **node, char **buffer, Node *parent)
     assert(node != nullptr);
     assert(buffer != nullptr);
     if (*buffer == nullptr) return;
-
+    
     while (isspace(**buffer)) (*buffer)++;
 
     if (**buffer != '(')
     {
-        fprintf(stderr, "Expected '(' at the beginning\n");
+        LOG(LOGL_ERROR, "Expected '(' at the beginning");
         return;
     }
 
@@ -180,7 +181,7 @@ void ParseMathExpr(Node **node, char **buffer, Node *parent)
     int offset = 0;
     if (sscanf(*buffer, "%[^ )]%n", value_buf, &offset) != 1)
     {
-        fprintf(stderr, "Invalid content inside parentheses\n");
+        LOG(LOGL_ERROR, "Invalid content inside parentheses");
         return;
     }
 
@@ -195,7 +196,7 @@ void ParseMathExpr(Node **node, char **buffer, Node *parent)
     {
         if (**buffer != ')')
         {
-            fprintf(stderr, "Expected ')' after leaf\n");
+            LOG(LOGL_ERROR, "Expected ')' after leaf");
             return;
         }
 
@@ -210,7 +211,7 @@ void ParseMathExpr(Node **node, char **buffer, Node *parent)
 
     if (**buffer != ')')
     {
-        fprintf(stderr, "Expected ')' after operator subtree\n");
+        LOG(LOGL_ERROR, "Expected ')' after operator subtree");
         FreeTree(*node);
         return;
     }

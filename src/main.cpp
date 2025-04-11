@@ -5,9 +5,13 @@
 
 #include "read_tree.h"
 #include "diff_tree.h"
+#include "logger.h"
 
 int main()
 {
+    const char* log_file = "logfile.log";
+    LoggerInit(LOGL_DEBUG, log_file, DEFAULT_MODE);
+
     const char* file_expr = "expr.txt";
 
     size_t file_size = 0;
@@ -32,18 +36,19 @@ int main()
 
     printf("Expression parsed successfully.\n");
 
-    //TreeDumpDot(root);
     TreeDumpDot2(root);
     printf("%lg\n", Eval(root));
 
     Node *c_node = CopyTree(root);
     Node *d_node = Diff(c_node);
     TreeDumpDot2(d_node);
+    TreeDumpDot(d_node);
 
     FreeTree(d_node);
     FreeTree(c_node);
     FreeTree(root);
 
+    LoggerDeinit();
     printf("End main!\n");
 }
 
