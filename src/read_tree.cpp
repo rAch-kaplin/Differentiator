@@ -140,8 +140,11 @@ NodeType DetectNodeType(const char *str)
     {
         char ch = str[0];
 
-        if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^') //FIXME
-            return OP;
+        for (size_t i = 0; i < size_of_opertations; i++)
+        {
+            if (strcmp(str, operations[i].symbol) == 0)
+                return OP;
+        }
 
         if (isalpha(ch))
             return VAR;
@@ -165,7 +168,7 @@ void ParseMathExpr(Node **node, char **buffer, Node *parent)
     assert(node != nullptr);
     assert(buffer != nullptr);
     if (*buffer == nullptr) return;
-    
+
     while (isspace(**buffer)) (*buffer)++;
 
     if (**buffer != '(')

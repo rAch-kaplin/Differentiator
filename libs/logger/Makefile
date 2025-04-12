@@ -7,25 +7,24 @@ CXXFLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-l
            -Wstrict-overflow=2 -Wsuggest-attribute=noreturn -Wsuggest-final-methods -Wsuggest-final-types -Wsuggest-override -Wswitch-default \
            -Wswitch-enum -Wsync-nand -Wundef -Wunreachable-code -Wunused -Wuseless-cast -Wvariadic-macros -Wno-literal-suffix -Wno-missing-field-initializers \
            -Wno-narrowing -Wno-old-style-cast -Wno-varargs -Wstack-protector -fcheck-new -fsized-deallocation -fstack-protector -fstrict-overflow \
-           -flto-odr-type-merging -fno-omit-frame-pointer -Wstack-usage=8192 -pie -fPIE -Werror=vla                                                     \
+           -flto-odr-type-merging -fno-omit-frame-pointer -Wstack-usage=8192 -pie -fPIE -Werror=vla \
            -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
 SOURCES = logger.cpp
-INCLUDES =
-
-OBJECTS = $(SOURCES:%.cpp=build/%.o)
-
+BUILD_DIR = build
+OBJECTS = $(addprefix $(BUILD_DIR)/, $(SOURCES:%.cpp=%.o))
 DEPENDS = $(OBJECTS:.o=.d)
 
-.PHONY: all
-all: build/logger.o
-	@echo -e "\033[33mLogger compiled.\033[0m"
+.PHONY: all clean
 
-build/logger.o: logger.cpp
+all: $(OBJECTS)
+	@echo -e "\033[33m Logger built.\033[0m"
+
+$(BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CXXFLAGS) -MP -MMD -c $< -o $@
 
--include $(DEPENDS)
-
 clean:
-	rm -rf build
+	@rm -rf $(BUILD_DIR)
+
+-include $(DEPENDS)

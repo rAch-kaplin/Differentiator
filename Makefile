@@ -7,36 +7,38 @@ CXXFLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-l
            -Wstrict-overflow=2 -Wsuggest-attribute=noreturn -Wsuggest-final-methods -Wsuggest-final-types -Wsuggest-override -Wswitch-default \
            -Wswitch-enum -Wsync-nand -Wundef -Wunreachable-code -Wunused -Wuseless-cast -Wvariadic-macros -Wno-literal-suffix -Wno-missing-field-initializers \
            -Wno-narrowing -Wno-old-style-cast -Wno-varargs -Wstack-protector -fcheck-new -fsized-deallocation -fstack-protector -fstrict-overflow \
-           -flto-odr-type-merging -fno-omit-frame-pointer -Wstack-usage=8192 -pie -fPIE -Werror=vla                                                     \
+           -flto-odr-type-merging -fno-omit-frame-pointer -Wstack-usage=8192 -pie -fPIE -Werror=vla \
            -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
-LIB_LOGGER_DIR = libs/logger
-LIB_LOGGER = $(LIB_LOGGER_DIR)/build/logger.o
+INCLUDES = -I./include -I./libs/logger
 
-SOURCES = src/main.cpp src/read_tree.cpp graphiz/graph_dump.cpp src/diff_tree.cpp
-INCLUDES = -I./include -I$(LIB_LOGGER_DIR)
+BUILD_DIR = build
+EXECUTABLE = do
 
-OBJECTS = $(SOURCES:%.cpp=build/%.o) $(LIB_LOGGER)
+SOURCES = src/main.cpp src/read_tree.cpp src/diff_tree.cpp graphiz/graph_dump.cpp
 
+OBJECTS = $(addprefix $(BUILD_DIR)/, $(SOURCES:%.cpp=%.o))
 DEPENDS = $(OBJECTS:.o=.d)
 
-.PHONY: all
-all: $(LIB_LOGGER) do.exe
-	@echo -e "\033[33mCompilation complete.\033[0m"
+LOGGER_LIB = libs/logger/build/logger.o
 
-do.exe: $(OBJECTS)
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o do
+.PHONY: all clean
 
-$(LIB_LOGGER):
-	@$(MAKE) -C $(LIB_LOGGER_DIR)
+all: $(EXECUTABLE)
 
-build/%.o: %.cpp
+$(EXECUTABLE): $(OBJECTS) $(LOGGER_LIB)
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@
+	@echo -e "\033[33m Build complete: $@ \033[0m"
+
+$(BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
 
--include $(DEPENDS)
+$(LOGGER_LIB):
+	@$(MAKE) -C libs/logger
 
-.PHONY: clean
 clean:
-	rm -rf do.exe build $(DEPENDS)
-	@$(MAKE) -C $(LIB_LOGGER_DIR) clean
+	@rm -rf $(BUILD_DIR) $(EXECUTABLE)
+	@$(MAKE) -C libs/logger clean
+
+-include $(DEPENDS)
