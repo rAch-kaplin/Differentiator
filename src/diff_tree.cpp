@@ -44,7 +44,7 @@ Node* CopyTree(Node *root)
 
     Node* node = NewNode(root->type, root->value, nullptr, nullptr);
 
-    if (root->left)   node->left  = CopyTree(root->left);
+    if (root->left)   node->left  = CopyTree(root->left); 
     if (root->right)  node->right = CopyTree(root->right);
 
     return node;

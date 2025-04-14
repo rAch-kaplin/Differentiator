@@ -12,6 +12,7 @@ const size_t BUFFER_SIZE = 10;
 
 NodeType DetectNodeType(const char *str);
 CodeError CreateNode(Node **dest, const char *data, Node *parent);
+void SkipSpaces(char **buffer);
 
 Node* NewNode(NodeType type, NodeValue value, Node* left, Node* right)
 {
@@ -36,7 +37,7 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
         return INVALID_ARGUMENT;
 
     NodeType type = DetectNodeType(data);
-    NodeValue value;
+    NodeValue value = {};
 
     switch (type)
     {
@@ -68,7 +69,7 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
             return INVALID_NODE_TYPE;
     }
 
-    Node* node = (Node*)malloc(sizeof(Node));
+    Node* node = (Node*)calloc(1, sizeof(Node));
     if (!node)
         return MEM_ALLOC_FAIL;
 
@@ -82,19 +83,25 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
     return OK;
 }
 
-void FreeTree(Node* node)
+void FreeTree(Node** node)
 {
-    if (!node) return;
+    if (! node || ! *node) return;
 
-    FreeTree(node->left);
-    FreeTree(node->right);
-    free(node);
-    node = nullptr;
+    FreeTree(&(*node)->left);
+    FreeTree(&(*node)->right);
+    free(*node);
+    *node = nullptr;
 }
 
 size_t GetSizeFile(FILE *name_base)
 {
-    fseek(name_base, 0, SEEK_END);
+    assert(name_base);
+
+    if (fseek(name_base, 0, SEEK_END) != 0)
+    {
+        LOG(LOGL_ERROR, "fseek() Error!");
+        return 0;
+    }
     size_t file_size = (size_t)ftell(name_base);
     rewind(name_base);
 
@@ -134,8 +141,6 @@ char *ReadFileToBuffer(const char *name_base, size_t *file_size)
 
 NodeType DetectNodeType(const char *str)
 {
-    if (str == nullptr) return VAR;
-
     if (strlen(str) == 1)
     {
         char ch = str[0];
@@ -150,17 +155,22 @@ NodeType DetectNodeType(const char *str)
             return VAR;
     }
 
-    int is_number = 1;
+    bool is_number = true;
     for (size_t i = 0; i < strlen(str); i++)
     {
         if (!isdigit(str[i]) && !(i == 0 && str[i] == '-'))
         {
-            is_number = 0;
-            break;
+            is_number = false;
+            break; //FIXME
         }
     }
 
     return is_number ? NUM : VAR;
+}
+
+void SkipSpaces(char **buffer)
+{
+    while (isspace(**buffer)) (*buffer)++;
 }
 
 void ParseMathExpr(Node **node, char **buffer, Node *parent)
@@ -169,7 +179,7 @@ void ParseMathExpr(Node **node, char **buffer, Node *parent)
     assert(buffer != nullptr);
     if (*buffer == nullptr) return;
 
-    while (isspace(**buffer)) (*buffer)++;
+    SkipSpaces(buffer);
 
     if (**buffer != '(')
     {
@@ -178,7 +188,7 @@ void ParseMathExpr(Node **node, char **buffer, Node *parent)
     }
 
     (*buffer)++;
-    while (isspace(**buffer)) (*buffer)++;
+    SkipSpaces(buffer);
 
     char value_buf[BUFFER_SIZE] = "";
     int offset = 0;
@@ -189,7 +199,7 @@ void ParseMathExpr(Node **node, char **buffer, Node *parent)
     }
 
     *buffer += offset;
-    while (isspace(**buffer)) (*buffer)++;
+    SkipSpaces(buffer);
 
     NodeType type = DetectNodeType(value_buf);
     CodeError err = CreateNode(node, value_buf, parent);
@@ -215,7 +225,7 @@ void ParseMathExpr(Node **node, char **buffer, Node *parent)
     if (**buffer != ')')
     {
         LOG(LOGL_ERROR, "Expected ')' after operator subtree");
-        FreeTree(*node);
+        FreeTree(node);
         return;
     }
 

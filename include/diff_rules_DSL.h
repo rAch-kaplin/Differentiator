@@ -55,7 +55,8 @@ DEF_OPER(POW,
         {
             return _MUL(_POW(CL, CR), _MUL(dR, _LOG(CL)));
         }
-    }
 
-    return nullptr;,
+        return nullptr;
+    },
+
     "^")
