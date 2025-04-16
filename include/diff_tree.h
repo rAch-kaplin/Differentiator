@@ -21,7 +21,7 @@ enum NodeType
     OP,
     NUM,
     VAR,
-}; //FIXME
+}; //FIXME Add func (sin, cos, ...)
 
 enum Op
 {

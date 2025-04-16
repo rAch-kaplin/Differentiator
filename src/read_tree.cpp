@@ -11,7 +11,6 @@
 const size_t BUFFER_SIZE = 10;
 
 NodeType DetectNodeType(const char *str);
-CodeError CreateNode(Node **dest, const char *data, Node *parent);
 void SkipSpaces(char **buffer);
 
 Node* NewNode(NodeType type, NodeValue value, Node* left, Node* right)
