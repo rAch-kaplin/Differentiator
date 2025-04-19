@@ -128,33 +128,33 @@ size_t GetSizeFile(FILE *name_base)
     return file_size;
 }
 
-char* ReadFileToBuffer(const char *name_base, size_t *file_size)
+char* ReadFileToBuffer(const char *expr, size_t *file_size)
 {
-    FILE *base_file = fopen(name_base, "r"); //FIXME base_file
-    if (base_file == nullptr)
+    FILE *file_expr = fopen(expr, "r");
+    if (file_expr == nullptr)
     {
-        LOG(LOGL_ERROR, "Can't open file: %s", name_base);
+        LOG(LOGL_ERROR, "Can't open file: %s", file_expr);
         return nullptr;
     }
 
-    *file_size = GetSizeFile(base_file);
+    *file_size = GetSizeFile(file_expr);
     char *buffer = (char*)calloc(*file_size + 1, sizeof(char));
     if (buffer == nullptr)
     {
         LOG(LOGL_ERROR, "Memory allocation failed");
-        fclose(base_file);
+        fclose(file_expr);
         return nullptr;
     }
 
-    size_t read = fread(buffer, sizeof(char), *file_size, base_file);
+    size_t read = fread(buffer, sizeof(char), *file_size, file_expr);
     if (read != *file_size)
     {
         free(buffer);
-        fclose(base_file);
+        fclose(file_expr);
         return nullptr;
     }
 
-    fclose(base_file);
+    fclose(file_expr);
 
     return buffer;
 }

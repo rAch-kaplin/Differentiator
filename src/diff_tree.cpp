@@ -90,8 +90,9 @@ double Eval(Node *node)
     if (node->type == VAR) return Global_x;
     if (node->type == OP)
     {
+    
         #define DEF_OPER(oper, eval_rule, ...) case oper: return eval_rule;
-        switch (node->value.op)
+        switch (node->value.op)  //TODO disclaimer
         {
             #include "diff_rules_DSL.h"
 
