@@ -6,6 +6,8 @@
 #include "read_tree.h"
 #include "diff_tree.h"
 #include "logger.h"
+#include "lexical_analysis.h"
+#include "syntaxis_analysis.h"
 
 int main()
 {
@@ -13,7 +15,16 @@ int main()
     LoggerInit(LOGL_DEBUG, log_file, DEFAULT_MODE);
 
     const char* file_expr = "expr.txt";
+    const char* file_expr2 = "expr2.txt";
 
+    Lexeme *lexeme_array = InitLexemeArray(file_expr2);
+    PrintLexemes(lexeme_array);
+
+    size_t cur = 0;
+    Node *node_G = GetG(lexeme_array, &cur);
+    TreeDumpDot2(node_G);
+    DeinitLexemes(lexeme_array);
+    FreeTree(&node_G);
     size_t file_size = 0;
     char *buffer = ReadFileToBuffer(file_expr, &file_size);
     if (!buffer)

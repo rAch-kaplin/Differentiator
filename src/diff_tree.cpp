@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <cmath>
+#include <stdlib.h>
 
 #include "read_tree.h"
 #include "diff_tree.h"
@@ -30,6 +31,45 @@ do {                                      \
 } while (0)
 
 const double EPSILON = 1e-10;
+const size_t MAX_VARS = 10;
+
+Variable* GetVarsTable()
+{
+    static Variable vars_table[MAX_VARS] = {};
+    return vars_table;
+}
+
+size_t LookupVar(Variable *vars_table, const char* name, size_t len_name)
+{
+    assert(vars_table && name);
+
+    size_t cur = 0;
+    while (vars_table[cur].name && cur < MAX_VARS)
+    {
+        if (strncmp(name, vars_table[cur].name, len_name) == 0)
+        {
+            break;
+        }
+
+        cur++;
+    }
+
+    return cur;
+}
+
+size_t AddVartable(Variable *vars_table, const char* name, size_t len_name)
+{
+    assert(vars_table && name);
+
+    size_t pos = LookupVar(vars_table, name, len_name);
+    if (vars_table[pos].name == nullptr)
+    {
+        vars_table[pos].name = name;
+        vars_table[pos].len_name = len_name;
+    }
+
+    return pos;
+}
 
 bool CheckVars(Node* node)
 {
@@ -60,6 +100,19 @@ double Eval(Node *node)
         }
         #undef DEF_OPER
     }
+//     if (node->type == FUNC)
+//     {
+//         #define DEF_FUNC(func, eval_rule, ...) case func: return eval_rule;
+//         switch (node->value.func)
+//         {
+//             #include "diff_rules_DSL.h"
+//
+//             default:
+//                 LOG(LOGL_ERROR,"Error: Unknown operation");
+//                 return NAN;
+//         }
+//         #undef DEF_FUNC
+//     }
 
     LOG(LOGL_ERROR, "Error: Unknown node type");
     return NAN;
@@ -85,7 +138,7 @@ Node* Diff(Node *node)
     if (node->type == VAR) return _NUM(1);
     if (node->type == OP)
     {
-        #define DEF_OPER(oper, eval_rule, diff_rule, ...) case oper: diff_rule;
+        #define DEF_OPER(oper, eval_rule, diff_rule, ...) case oper: diff_rule
         switch (node->value.op)
         {
             #include "diff_rules_DSL.h"
@@ -96,6 +149,19 @@ Node* Diff(Node *node)
         }
         #undef DEF_OPER
     }
+//     if (node->type == FUNC)
+//     {
+//         #define DEF_FUNC(func, eval_rule, diff_rule, ...) case func: diff_rule
+//         switch (node->value.func)
+//         {
+//             #include "diff_rules_DSL.h"
+//
+//             default:
+//                 LOG(LOGL_ERROR,"Error: Unknown func");
+//                 return nullptr;
+//         }
+//         #undef DEF_FUNC
+//     }
 
     return nullptr;
 }

@@ -4,14 +4,11 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "read_tree.h"
 #include "diff_tree.h"
+#include "read_tree.h"
 #include "logger.h"
 
 const size_t BUFFER_SIZE = 10;
-
-NodeType DetectNodeType(const char *str);
-void SkipSpaces(char **buffer);
 
 Node* NewNode(NodeType type, NodeValue value, Node* left, Node* right)
 {
@@ -35,6 +32,10 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
     if (dest == nullptr || data == nullptr)
         return INVALID_ARGUMENT;
 
+    Node* node = (Node*)calloc(1, sizeof(Node));
+    if (!node)
+        return MEM_ALLOC_FAIL;
+
     NodeType type = DetectNodeType(data);
     NodeValue value = {};
 
@@ -57,8 +58,10 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
         }
 
         case VAR:
-            value.var = (size_t)data[0];
-            break;
+        {
+            value.var = AddVartable(GetVarsTable(), data, strlen(data));
+            break; //FIXME errors overflow
+        }
 
         case NUM:
             value.num = atof(data);
@@ -67,10 +70,6 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
         default:
             return INVALID_NODE_TYPE;
     }
-
-    Node* node = (Node*)calloc(1, sizeof(Node));
-    if (!node)
-        return MEM_ALLOC_FAIL;
 
     node->type = type;
     node->value = value;
@@ -107,9 +106,9 @@ size_t GetSizeFile(FILE *name_base)
     return file_size;
 }
 
-char *ReadFileToBuffer(const char *name_base, size_t *file_size)
+char* ReadFileToBuffer(const char *name_base, size_t *file_size)
 {
-    FILE *base_file = fopen(name_base, "r");
+    FILE *base_file = fopen(name_base, "r"); //FIXME base_file
     if (base_file == nullptr)
     {
         LOG(LOGL_ERROR, "Can't open file: %s", name_base);

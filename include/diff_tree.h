@@ -1,7 +1,7 @@
-#ifndef _DIIF_TREE
-#define _DIIF_TREE
+#ifndef _DIFF_TREE
+#define _DIFF_TREE
 
-#include "read_tree.h"
+#include <stdint.h>
 
 const double Global_x = 2.0;
 
@@ -21,11 +21,17 @@ enum NodeType
     OP,
     NUM,
     VAR,
-}; //FIXME Add func (sin, cos, ...)
+    FUNC,
+};
 
 enum Op
 {
-    ADD, SUB, MUL, DIV, SIN, COS,  LOG, POW,
+    ADD, SUB, MUL, DIV, POW,
+};
+
+enum Func
+{
+    SIN, COS, LOG,
 };
 
 typedef struct Operation
@@ -34,11 +40,18 @@ typedef struct Operation
     const char* symbol;
 } Operation;
 
+typedef struct Variable
+{
+    const char *name;
+    size_t len_name;
+} Variable;
+
 union NodeValue
 {
     double num;
     Op op;
-    int var;
+    Func func;
+    size_t var;
 };
 
 typedef struct Node
@@ -74,4 +87,8 @@ CodeError TreeDumpDot2(Node* root);
 
 bool CheckVars(Node* node);
 
-#endif //_DIIF_TREE
+Variable* GetVarsTable();
+size_t LookupVar(Variable *vars_table, const char* name, size_t len_name);
+size_t AddVartable(Variable *vars_table, const char* name, size_t len_name);
+
+#endif //_DIFF_TREE

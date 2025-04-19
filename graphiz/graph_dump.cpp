@@ -97,6 +97,10 @@ CodeError TreeDumpDot(Node* root)
     fclose(file);
     free(buffer);
 
+    char mkdir_command[256]; //FIXME
+    snprintf(mkdir_command, sizeof(mkdir_command), "mkdir -p graphiz/img graphiz/dot");
+    system(mkdir_command);
+
     char png_filename[PNG_NAME_SIZE];
     snprintf(png_filename, sizeof(png_filename), "graphiz/img/dump_%d.png", dump_counter++);
 
@@ -206,7 +210,11 @@ CodeError TreeDumpDot2(Node* root)
     fclose(file);
     free(buffer);
 
-    char png_name[64];
+    char mkdir_command[256];
+    snprintf(mkdir_command, sizeof(mkdir_command), "mkdir -p graphiz/img graphiz/dot");
+    system(mkdir_command);
+
+    char png_name[64]; //FIXME const 64, ...
     snprintf(png_name, sizeof(png_name), "graphiz/img/dump2_%d.png", dump_counter++);
 
     char command[128];

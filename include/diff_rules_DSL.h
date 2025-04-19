@@ -1,39 +1,29 @@
+#ifndef _DIFF_RULES_DCL
+#define _DIFF_RULES_DCL
+
 #include "diff_tree.h"
+
+#ifdef DEF_OPER
 
 DEF_OPER(ADD,
     _ELEFT + _ERIGHT,
-    return _ADD (dL, dR);,
-    "+")
+    { return _ADD (dL, dR); },
+    '+')
 
 DEF_OPER(SUB,
     _ELEFT - _ERIGHT,
-    return _SUB (dL, dR);,
-    "-")
+    { return _SUB (dL, dR); },
+    '-')
 
 DEF_OPER(MUL,
     _ELEFT * _ERIGHT,
-    return _ADD (_MUL (dL, CR), _MUL (CL, dR));,
-    "*")
+    { return _ADD (_MUL (dL, CR), _MUL (CL, dR)); },
+    '*')
 
 DEF_OPER(DIV,
     _ELEFT / _ERIGHT,
-    return _DIV (_SUB (_MUL (dL, CR), _MUL(CL, dR)), _MUL(CR, CR));,
-    "/")
-
-DEF_OPER(SIN,
-    sin(_ERIGHT),
-    return _MUL (_COS(CR), dR);,
-    "sin")
-
-DEF_OPER(COS,
-    cos(_ERIGHT),
-    return _MUL (_SIN (_MUL ( _NUM(-1), CR)), dR);,
-    "cos")
-
-DEF_OPER(LOG,
-    log(_ERIGHT),
-    return _DIV (dR, CR);,
-    "ln")
+    { return _DIV (_SUB (_MUL (dL, CR), _MUL(CL, dR)), _MUL(CR, CR)); },
+    '/')
 
 DEF_OPER(POW,
     pow(_ELEFT, _ERIGHT),
@@ -59,4 +49,25 @@ DEF_OPER(POW,
         return nullptr;
     },
 
-    "^")
+    '^')
+#endif //DEF_OPER
+
+#ifdef DEF_FUNC
+DEF_FUNC(SIN,
+    sin(_ERIGHT),
+    { return _MUL (_COS(CR), dR); },
+    "sin")
+
+DEF_FUNC(COS,
+    cos(_ERIGHT),
+    { return _MUL (_SIN (_MUL ( _NUM(-1), CR)), dR); },
+    "cos")
+
+DEF_FUNC(LOG,
+    log(_ERIGHT),
+    { return _DIV (dR, CR); },
+    "ln")
+
+#endif //DEF_FUNC
+
+#endif ///DIFF_RULES_FUNC

@@ -8,5 +8,7 @@ char *ReadFileToBuffer(const char *name_base, size_t *file_size);
 void ParseMathExpr(Node **node, char **buffer, Node *parent);
 void FreeTree(Node** node);
 CodeError CreateNode(Node **dest, const char *data, Node *parent);
+NodeType DetectNodeType(const char *str);
+void SkipSpaces(char **buffer);
 
 #endif //_READ_TREE
