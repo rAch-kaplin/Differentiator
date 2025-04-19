@@ -114,12 +114,6 @@ void FreeTree(Node** node)
     *node = nullptr;
 }
 
-// void Dtor(Node **node, Variable *var)
-// {
-//     FreeTree(node);
-//     free(var->name);
-// }
-
 size_t GetSizeFile(FILE *name_base)
 {
     assert(name_base);
@@ -172,7 +166,7 @@ NodeType DetectNodeType(const char *str)
     {
         char ch = str[0];
 
-        for (size_t i = 0; i < size_of_opertations; i++)
+        for (size_t i = 0; i < size_of_operations; i++)
         {
             if (strcmp(str, operations[i].symbol) == 0)
                 return OP;

@@ -8,14 +8,31 @@
 #include "logger.h"
 #include "lexical_analysis.h"
 #include "syntaxis_analysis.h"
+#include "arg_parser.h"
+#include "colors.h"
 
-int main()
+int main(int argc, const char* argv[]) //TODO not const
 {
     const char* log_file = "logfile.log";
     LoggerInit(LOGL_DEBUG, log_file, DEFAULT_MODE);
 
-    const char* file_expr = "expr.txt";
-    const char* file_expr2 = "expr2.txt";
+    ArgOption options[] = { {"-i",  "--input", true, nullptr, false},
+                            {"-o", "--output", true, nullptr, false} };
+
+    if (ParseArguments(argc, argv, options, sizeof(options) / sizeof(options[0])) != PARSE_OK)
+    {
+        fprintf(stderr, "ParseArg error\n");
+        return 1;
+    }
+
+    const char* file_expr = options[INPUT].argument;
+    if (file_expr == nullptr)
+    {
+        fprintf(stderr, RED "Can't open file_expr, please input -i *.txt\n" RESET);
+        return 1;
+    }
+
+    const char *file_expr2 = "expr2.txt";
 
     Node *node_G = ReadExpression(file_expr2);
     TreeDumpDot2(node_G);
@@ -47,13 +64,6 @@ int main()
     TreeDumpDot2(root);
     printf("%lg\n", Eval(root));
 
-    Node *c_node = CopyTree(root);
-    Node *d_node = Diff(c_node);
-    TreeDumpDot2(d_node);
-    TreeDumpDot(d_node);
-
-    FreeTree(&d_node);
-    FreeTree(&c_node);
     FreeTree(&root);
 
     LoggerDeinit();

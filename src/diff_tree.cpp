@@ -11,25 +11,18 @@
 bool ConstFolding(Node *node);
 bool RemoveNeutralElems(Node **node);
 void Replace(Node **node, Node *son);
+
 bool AddOptimisation(Node **node);
 bool SubOptimisation(Node **node);
 bool MulOptimisation(Node **node);
 bool DivOptimisation(Node **node);
 bool PowOptimisation(Node **node);
 bool CompareDoubles(double value1, double value2);
-void Optimize(Node **node);
 
-#define ReplaceWithOne()                  \
-do {                                      \
-    (*node)->type = NUM;                  \
-    (*node)->value.num = 1.0;             \
-                                          \
-    FreeTree(&(*node)->left);             \
-    FreeTree(&(*node)->right);            \
-                                          \
-    (*node)->left  = nullptr;             \
-    (*node)->right = nullptr;             \
-} while (0) //TODO func
+void Optimize(Node **node);
+void ReplaceWithOne(Node **node);
+
+bool IsNum(const Node *node);
 
 const double EPSILON = 1e-10;
 const size_t MAX_VARS = 10;
@@ -104,19 +97,19 @@ double Eval(Node *node)
         }
         #undef DEF_OPER
     }
-//     if (node->type == FUNC)
-//     {
-//         #define DEF_FUNC(func, eval_rule, ...) case func: return eval_rule;
-//         switch (node->value.func)
-//         {
-//             #include "diff_rules_DSL.h"
-//
-//             default:
-//                 LOG(LOGL_ERROR,"Error: Unknown operation");
-//                 return NAN;
-//         }
-//         #undef DEF_FUNC
-//     }
+    if (node->type == FUNC)
+    {
+        #define DEF_FUNC(func, eval_rule, ...) case func: return eval_rule;
+        switch (node->value.func)
+        {
+            #include "diff_rules_DSL.h"
+
+            default:
+                LOG(LOGL_ERROR,"Error: Unknown operation");
+                return NAN;
+        }
+        #undef DEF_FUNC
+    }
 
     LOG(LOGL_ERROR, "Error: Unknown node type");
     return NAN;
@@ -153,19 +146,19 @@ Node* Diff(Node *node)
         }
         #undef DEF_OPER
     }
-//     if (node->type == FUNC)
-//     {
-//         #define DEF_FUNC(func, eval_rule, diff_rule, ...) case func: diff_rule
-//         switch (node->value.func)
-//         {
-//             #include "diff_rules_DSL.h"
-//
-//             default:
-//                 LOG(LOGL_ERROR,"Error: Unknown func");
-//                 return nullptr;
-//         }
-//         #undef DEF_FUNC
-//     }
+    if (node->type == FUNC)
+    {
+        #define DEF_FUNC(func, eval_rule, diff_rule, ...) case func: diff_rule
+        switch (node->value.func)
+        {
+            #include "diff_rules_DSL.h"
+
+            default:
+                LOG(LOGL_ERROR,"Error: Unknown func");
+                return nullptr;
+        }
+        #undef DEF_FUNC
+    }
 
     return nullptr;
 }
@@ -238,16 +231,21 @@ void Replace(Node **node, Node *son)
     FreeTree(&temp);
 }
 
+bool IsNum(const Node *node)
+{
+    return node != nullptr && node->type == NUM;
+}
+
 bool AddOptimisation(Node **node)
 {
     assert(node && *node);
 
-    if ((*node)->left->type == NUM && CompareDoubles((*node)->left->value.num, 0)) //TODO IsNum IsZero
+    if (IsNum((*node)->left) && CompareDoubles((*node)->left->value.num, 0)) //TODO IsNum IsZero
     {
         Replace(node, (*node)->right);
         return true;
     }
-    else if ((*node)->right->type == NUM && CompareDoubles((*node)->right->value.num, 0))
+    else if (IsNum((*node)->right) && CompareDoubles((*node)->right->value.num, 0))
     {
         Replace(node, (*node)->left);
         return true;
@@ -260,7 +258,7 @@ bool SubOptimisation(Node **node)
 {
     assert(node && *node);
 
-    if ((*node)->right->type == NUM && CompareDoubles((*node)->right->value.num, 0))
+    if (IsNum((*node)->right)  && CompareDoubles((*node)->right->value.num, 0))
     {
         Replace(node, (*node)->left);
         return true;
@@ -273,7 +271,7 @@ bool MulOptimisation(Node **node)
 {
     assert(node && *node);
 
-    if ((*node)->left->type == NUM)
+    if (IsNum((*node)->left))
     {
         if (CompareDoubles((*node)->left->value.num, 1))
         {
@@ -286,7 +284,7 @@ bool MulOptimisation(Node **node)
             return true;
         }
     }
-    else if ((*node)->right->type == NUM)
+    else if (IsNum((*node)->right) )
     {
         if (CompareDoubles((*node)->right->value.num, 1))
         {
@@ -307,16 +305,16 @@ bool DivOptimisation(Node **node)
 {
     assert(node && *node);
 
-    if ((*node)->right->type == NUM)
+    if (IsNum((*node)->right) )
     {
         if (CompareDoubles((*node)->right->value.num, 1))
         {
             Replace(node, (*node)->left);
             return true;
         }
-        else if ((*node)->left->type == NUM && CompareDoubles((*node)->right->value.num, (*node)->left->value.num))
+        else if (IsNum((*node)->left) && CompareDoubles((*node)->right->value.num, (*node)->left->value.num))
         {
-            ReplaceWithOne();
+            ReplaceWithOne(node);
             return true;
         }
     }
@@ -328,7 +326,7 @@ bool PowOptimisation(Node **node)
 {
     assert(node && *node);
 
-    if ((*node)->left->type == NUM)
+    if (IsNum((*node)->left))
     {
         if (CompareDoubles((*node)->left->value.num, 0) || CompareDoubles((*node)->left->value.num, 1))
         {
@@ -341,7 +339,7 @@ bool PowOptimisation(Node **node)
     {
         if (CompareDoubles((*node)->right->value.num, 0))
         {
-            ReplaceWithOne();
+            ReplaceWithOne(node);
             return true;
         }
         else if (CompareDoubles((*node)->right->value.num, 1))
@@ -354,4 +352,17 @@ bool PowOptimisation(Node **node)
     return false;
 }
 
-#undef ReplaceWithOne
+void ReplaceWithOne(Node **node)
+{
+    assert(node);
+
+    (*node)->type = NUM;
+    (*node)->value.num = 1.0;
+
+    FreeTree(&(*node)->left);
+    FreeTree(&(*node)->right);
+
+    (*node)->left  = nullptr;
+    (*node)->right = nullptr;
+}
+

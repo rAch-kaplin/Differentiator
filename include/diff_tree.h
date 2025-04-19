@@ -75,7 +75,7 @@ static const Operation operations[] =
 
 };
 
-const size_t size_of_opertations = sizeof(operations) / sizeof(operations[0]);
+const size_t size_of_operations = sizeof(operations) / sizeof(operations[0]);
 
 Node* NewNode(NodeType type, NodeValue value, Node* left, Node* right);
 double Eval(Node *node);

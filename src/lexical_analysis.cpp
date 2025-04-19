@@ -8,7 +8,7 @@
 #include "colors.h"
 
 const size_t lexeme_array_size = 100;
-bool GetOperation(Lexeme *lexeme_array, size_t lexeme_ip, const char **cur);
+bool GetOperation(Lexeme *lexeme_array, size_t lexeme_count, const char **cur);
 void SkipSpaces(const char **buffer);
 
 void SkipSpaces(const char **buffer)
@@ -28,60 +28,60 @@ Lexeme* StringToLexemes(const char *str)
     const char *cur = str;
     const char *end = strchr(str, '\0');
 
-    size_t lexeme_ip = 0; //FIXME counter
+    size_t lexeme_count = 0;
 
     while (cur < end)
     {
         SkipSpaces(&cur);
-        LOG(LOGL_DEBUG, "curr: %c ---> {%d}, ip = [%d]", *cur, *cur, lexeme_ip);
+        LOG(LOGL_DEBUG, "curr: %c ---> {%d}, ip = [%d]", *cur, *cur, lexeme_count);
 
         if (*cur == '(')
         {
-            lexeme_array[lexeme_ip].type = LEX_LBRACKET;
-            lexeme_array[lexeme_ip].value.num = '('; //FIXME
+            lexeme_array[lexeme_count].type = LEX_LBRACKET;
+            lexeme_array[lexeme_count].value.num = '('; //FIXME
             cur++;
-            lexeme_ip++;
+            lexeme_count++;
             continue;
         }
         else if (*cur == ')')
         {
-            lexeme_array[lexeme_ip].type = LEX_RBRACKET;
-            lexeme_array[lexeme_ip].value.num = ')';
+            lexeme_array[lexeme_count].type = LEX_RBRACKET;
+            lexeme_array[lexeme_count].value.num = ')';
             cur++;
-            lexeme_ip++;
+            lexeme_count++;
             continue;
         }
         else if (*cur == '$')
         {
-            lexeme_array[lexeme_ip].type = LEX_END;
-            lexeme_array[lexeme_ip].value.num = '$';
+            lexeme_array[lexeme_count].type = LEX_END;
+            lexeme_array[lexeme_count].value.num = '$';
             cur++;
-            lexeme_ip++;
+            lexeme_count++;
             continue;
         }
         else if (isdigit(*cur)) //TODO check -
         {
-            lexeme_array[lexeme_ip].type = LEX_NUM;
+            lexeme_array[lexeme_count].type = LEX_NUM;
             char *end_num = nullptr;
-            lexeme_array[lexeme_ip].value.num = strtod(cur, &end_num);
+            lexeme_array[lexeme_count].value.num = strtod(cur, &end_num);
             cur = (const char*)end_num;
-            lexeme_ip++;
+            lexeme_count++;
             continue;
         }
         else if (isalpha(*cur))
         {
             continue; //FIXME
         }
-        else if (GetOperation(lexeme_array, lexeme_ip, &cur))
+        else if (GetOperation(lexeme_array, lexeme_count, &cur))
         {
-            lexeme_ip++;
+            lexeme_count++;
             continue;
         }
     }
     return lexeme_array;
 }
 
-bool GetOperation(Lexeme *lexeme_array, size_t lexeme_ip, const char **cur)
+bool GetOperation(Lexeme *lexeme_array, size_t lexeme_count, const char **cur)
 {
     assert(lexeme_array);
     assert(cur && *cur);
@@ -93,8 +93,8 @@ bool GetOperation(Lexeme *lexeme_array, size_t lexeme_ip, const char **cur)
     {
         if (strcmp(symbol, operations[i].symbol) == 0)
         {
-            lexeme_array[lexeme_ip].type = LEX_OP;
-            lexeme_array[lexeme_ip].value.op = operations[i].op;
+            lexeme_array[lexeme_count].type = LEX_OP;
+            lexeme_array[lexeme_count].value.op = operations[i].op;
 
             (*cur)++;
             return true;
@@ -123,7 +123,7 @@ void PrintLexemes(const Lexeme *lexeme_array)
                 break;
 
             case LEX_OP:
-                for (size_t j = 0; j < size_of_opertations; j++)
+                for (size_t j = 0; j < size_of_operations; j++)
                 {
                     if (operations[j].op == lex->value.op)
                     {

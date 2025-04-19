@@ -83,7 +83,7 @@ Node* GetD(Lexeme *lexeme_array, size_t *cur)
         Node *node2 = GetD(lexeme_array, cur);
         node = _POW(node, node2);
     }
-
+    
     return node;
 }
 
