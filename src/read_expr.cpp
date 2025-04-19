@@ -100,6 +100,7 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
     node->parent = parent;
 
     *dest = node;
+
     return OK;
 }
 
@@ -112,6 +113,12 @@ void FreeTree(Node** node)
     free(*node);
     *node = nullptr;
 }
+
+// void Dtor(Node **node, Variable *var)
+// {
+//     FreeTree(node);
+//     free(var->name);
+// }
 
 size_t GetSizeFile(FILE *name_base)
 {
@@ -211,6 +218,7 @@ void ParseMathExpr(Node **node, char **buffer, Node *parent)
     SkipSpaces(buffer);
 
     char value_buf[BUFFER_SIZE] = "";
+    LOG(LOGL_DEBUG, "value_buf p=%p", value_buf);
     int offset = 0;
     if (sscanf(*buffer, "%[^ )]%n", value_buf, &offset) != 1)
     {

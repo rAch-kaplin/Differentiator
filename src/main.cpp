@@ -19,6 +19,7 @@ int main()
 
     Node *node_G = ReadExpression(file_expr2);
     TreeDumpDot2(node_G);
+    printf("%lg\n", Eval(node_G));
     FreeTree(&node_G);
 
     size_t file_size = 0;
@@ -48,8 +49,8 @@ int main()
 
     Node *c_node = CopyTree(root);
     Node *d_node = Diff(c_node);
-    // TreeDumpDot2(d_node);
-    // TreeDumpDot(d_node);
+    TreeDumpDot2(d_node);
+    TreeDumpDot(d_node);
 
     FreeTree(&d_node);
     FreeTree(&c_node);

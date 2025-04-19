@@ -5,3 +5,4 @@ exprt.txt
 graphiz/dot
 tests/build
 tests/tests
+.vscode

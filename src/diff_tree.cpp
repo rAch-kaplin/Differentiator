@@ -29,12 +29,12 @@ do {                                      \
                                           \
     (*node)->left  = nullptr;             \
     (*node)->right = nullptr;             \
-} while (0)
+} while (0) //TODO func
 
 const double EPSILON = 1e-10;
 const size_t MAX_VARS = 10;
 
-Variable* GetVarsTable()
+Variable* GetVarsTable() //TODO struct
 {
     static Variable vars_table[MAX_VARS] = {};
     return vars_table;
@@ -62,10 +62,12 @@ size_t AddVartable(Variable *vars_table, const char* name, size_t len_name)
 {
     assert(vars_table && name);
 
-    size_t pos = LookupVar(vars_table, name, len_name);
+    char *str = strdup(name);
+
+    size_t pos = LookupVar(vars_table, str, len_name);
     if (vars_table[pos].name == nullptr)
     {
-        vars_table[pos].name = name;
+        vars_table[pos].name = str;
         vars_table[pos].len_name = len_name;
     }
 
@@ -90,7 +92,7 @@ double Eval(Node *node)
     if (node->type == VAR) return Global_x;
     if (node->type == OP)
     {
-    
+
         #define DEF_OPER(oper, eval_rule, ...) case oper: return eval_rule;
         switch (node->value.op)  //TODO disclaimer
         {
@@ -176,10 +178,7 @@ void Optimize(Node **node)
 
     do
     {
-        changed = false;
-
         changed |= ConstFolding(*node);
-
         changed |= RemoveNeutralElems(node);
 
     } while (changed);
@@ -243,7 +242,7 @@ bool AddOptimisation(Node **node)
 {
     assert(node && *node);
 
-    if ((*node)->left->type == NUM && CompareDoubles((*node)->left->value.num, 0))
+    if ((*node)->left->type == NUM && CompareDoubles((*node)->left->value.num, 0)) //TODO IsNum IsZero
     {
         Replace(node, (*node)->right);
         return true;

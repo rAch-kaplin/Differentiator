@@ -5,6 +5,7 @@
 #include <assert.h>
 
 #include "read_tree.h"
+#include "logger.h"
 
 const size_t size_op = 32;
 
@@ -15,7 +16,7 @@ int GenerateGraph2(Node* node, char* buffer, int* buffer_len, const size_t BUFFE
 
 const char* GetNodeLabel(const Node* node)
 {
-    static char label[size_op];
+    static char label[size_op] = "";
 
     switch (node->type)
     {
@@ -29,6 +30,7 @@ const char* GetNodeLabel(const Node* node)
 
             if (vars_table[var_index].name != nullptr)
             {
+                LOG(LOGL_DEBUG, "GetNOdeLabel(): p=%p", vars_table[var_index].name);
                 snprintf(label, sizeof(label), "%s", vars_table[var_index].name);
             }
             else

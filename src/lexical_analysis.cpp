@@ -28,7 +28,7 @@ Lexeme* StringToLexemes(const char *str)
     const char *cur = str;
     const char *end = strchr(str, '\0');
 
-    size_t lexeme_ip = 0;
+    size_t lexeme_ip = 0; //FIXME counter
 
     while (cur < end)
     {
@@ -38,7 +38,7 @@ Lexeme* StringToLexemes(const char *str)
         if (*cur == '(')
         {
             lexeme_array[lexeme_ip].type = LEX_LBRACKET;
-            lexeme_array[lexeme_ip].value.num = '(';
+            lexeme_array[lexeme_ip].value.num = '('; //FIXME
             cur++;
             lexeme_ip++;
             continue;
@@ -59,7 +59,7 @@ Lexeme* StringToLexemes(const char *str)
             lexeme_ip++;
             continue;
         }
-        else if (isdigit(*cur))
+        else if (isdigit(*cur)) //TODO check -
         {
             lexeme_array[lexeme_ip].type = LEX_NUM;
             char *end_num = nullptr;
@@ -87,7 +87,7 @@ bool GetOperation(Lexeme *lexeme_array, size_t lexeme_ip, const char **cur)
     assert(cur && *cur);
 
     char ch = **cur;
-    char symbol[2] = {ch, '\0'};
+    char symbol[2] = {ch, '\0'}; //FIXME
 
     for (size_t i = 0; i < sizeof(operations) / sizeof(operations[0]); i++)
     {
@@ -183,4 +183,3 @@ void DeinitLexemes(Lexeme* lexeme_array)
 
     free(lexeme_array);
 }
-

@@ -17,7 +17,7 @@ Node* GetG(Lexeme *lexeme_array, size_t *cur)
     {
         fprintf(stderr, "Not find '$'\n");
         LOG(LOGL_ERROR, "Not find '$'");
-        assert(0);
+        assert(0); //FIXME
     }
     return node;
 }
@@ -80,11 +80,11 @@ Node* GetD(Lexeme *lexeme_array, size_t *cur)
     while (lexeme_array[*cur].value.op == POW)
     {
         (*cur)++;
-        Node *node2 = GetP(lexeme_array, cur);
+        Node *node2 = GetD(lexeme_array, cur);
         node = _POW(node, node2);
     }
-    return node;
 
+    return node;
 }
 
 Node* GetP(Lexeme *lexeme_array, size_t *cur)
