@@ -7,8 +7,27 @@
 #include "diff_tree.h"
 #include "read_tree.h"
 #include "logger.h"
+#include "lexical_analysis.h"
+#include "syntaxis_analysis.h"
 
 const size_t BUFFER_SIZE = 10;
+
+Node* ReadExpression(const char *file_expr)
+{
+    Lexeme *lexeme_array = InitLexemeArray(file_expr);
+    if (lexeme_array == nullptr)
+    {
+        LOG(LOGL_ERROR, "Lexeme_array was not allocated");
+        return nullptr;
+    }
+    PrintLexemes(lexeme_array);
+
+    size_t cur = 0;
+    Node *node_G = GetG(lexeme_array, &cur);
+    DeinitLexemes(lexeme_array);
+
+    return node_G;
+}
 
 Node* NewNode(NodeType type, NodeValue value, Node* left, Node* right)
 {
@@ -66,6 +85,9 @@ CodeError CreateNode(Node **dest, const char *data, Node *parent)
         case NUM:
             value.num = atof(data);
             break;
+
+        case FUNC:
+            break; //TODO
 
         default:
             return INVALID_NODE_TYPE;

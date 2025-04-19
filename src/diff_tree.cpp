@@ -17,6 +17,7 @@ bool MulOptimisation(Node **node);
 bool DivOptimisation(Node **node);
 bool PowOptimisation(Node **node);
 bool CompareDoubles(double value1, double value2);
+void Optimize(Node **node);
 
 #define ReplaceWithOne()                  \
 do {                                      \

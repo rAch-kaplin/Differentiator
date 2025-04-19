@@ -23,8 +23,20 @@ const char* GetNodeLabel(const Node* node)
             snprintf(label, sizeof(label), "%lg", node->value.num);
             break;
         case VAR:
-            snprintf(label, sizeof(label), "%c", node->value.var);
+        {
+            Variable* vars_table = GetVarsTable();
+            size_t var_index = node->value.var;
+
+            if (vars_table[var_index].name != nullptr)
+            {
+                snprintf(label, sizeof(label), "%s", vars_table[var_index].name);
+            }
+            else
+            {
+                snprintf(label, sizeof(label), "var[%zu]", var_index);
+            }
             break;
+        }
         case OP:
         {
             const char* op_symbol = NULL;
@@ -39,6 +51,8 @@ const char* GetNodeLabel(const Node* node)
             snprintf(label, sizeof(label), "%s", op_symbol ? op_symbol : "?");
             break;
         }
+        case FUNC:
+            break; //TODO
         default:
         {
             snprintf(label, sizeof(label), "UNKNOWN");
@@ -58,6 +72,7 @@ const char* GetNodeColor(const Node* node)
         case NUM:    return "#ff9a8d";
         case VAR:    return "#7e8aab";
         case OP:     return "#aed6dc";
+        case FUNC:   return "#809fb0";
         default:     return "#ffffff";
     }
 }
@@ -65,7 +80,7 @@ const char* GetNodeColor(const Node* node)
 CodeError TreeDumpDot(Node* root)
 {
     static int dump_counter = 0;
-    const size_t PNG_NAME_SIZE = 64;
+    const size_t PNG_NAME_SIZE = 64;  //TODO ^ const
     const size_t BUFFER_SIZE = 32768;
 
     char* buffer = (char*)calloc(BUFFER_SIZE, sizeof(char));
@@ -97,15 +112,13 @@ CodeError TreeDumpDot(Node* root)
     fclose(file);
     free(buffer);
 
-    char mkdir_command[256]; //FIXME
-    snprintf(mkdir_command, sizeof(mkdir_command), "mkdir -p graphiz/img graphiz/dot");
-    system(mkdir_command);
+    system("mkdir -p graphiz/img graphiz/dot");
 
-    char png_filename[PNG_NAME_SIZE];
-    snprintf(png_filename, sizeof(png_filename), "graphiz/img/dump_%d.png", dump_counter++);
+    char png_name[PNG_NAME_SIZE] = {};
+    snprintf(png_name, sizeof(png_name), "graphiz/img/dump_%d.png", dump_counter++);
 
-    char command[256];
-    snprintf(command, sizeof(command), "dot -Tpng graphiz/dot/dump.dot -o %s", png_filename);
+    char command[512] = {}; //FIXME
+    snprintf(command, sizeof(command), "dot -Tpng graphiz/dot/dump.dot -o %s", png_name);
     system(command);
 
     return OK;
@@ -191,7 +204,7 @@ CodeError TreeDumpDot2(Node* root)
     int buffer_len = snprintf(buffer, BUFFER_SIZE,
         "digraph G {\n"
         "\trankdir=HR;\n"
-        "\tbgcolor=\"#ebf7fa\";\n"
+        "\tbgcolor=\"#d8e3eb\";\n"
         "\tnode [fontname=\"Arial\", fontsize=12];\n");
 
     GenerateGraph2(root, buffer, &buffer_len, BUFFER_SIZE);
@@ -210,14 +223,12 @@ CodeError TreeDumpDot2(Node* root)
     fclose(file);
     free(buffer);
 
-    char mkdir_command[256];
-    snprintf(mkdir_command, sizeof(mkdir_command), "mkdir -p graphiz/img graphiz/dot");
-    system(mkdir_command);
+    system("mkdir -p graphiz/img graphiz/dot");
 
-    char png_name[64]; //FIXME const 64, ...
+    char png_name[256] = {};
     snprintf(png_name, sizeof(png_name), "graphiz/img/dump2_%d.png", dump_counter++);
 
-    char command[128];
+    char command[512] = {};
     snprintf(command, sizeof(command), "dot -Tpng graphiz/dot/dump2.dot -o %s", png_name);
     system(command);
 

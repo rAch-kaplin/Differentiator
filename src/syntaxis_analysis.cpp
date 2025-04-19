@@ -114,7 +114,11 @@ Node* GetP(Lexeme *lexeme_array, size_t *cur)
             (*cur)++;
             return node;
         }
-
+        case LEX_VAR:
+        case LEX_END:
+        case LEX_RBRACKET:
+        case LEX_OP:
+            break; //FIXME
 
         default:
         {
@@ -123,4 +127,6 @@ Node* GetP(Lexeme *lexeme_array, size_t *cur)
             return nullptr;
         }
     }
+
+    return nullptr;
 }

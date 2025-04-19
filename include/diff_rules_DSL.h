@@ -1,8 +1,6 @@
 #ifndef _DIFF_RULES_DCL
 #define _DIFF_RULES_DCL
 
-#include "diff_tree.h"
-
 #ifdef DEF_OPER
 
 DEF_OPER(ADD,

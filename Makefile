@@ -10,12 +10,12 @@ CXXFLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-l
            -flto-odr-type-merging -fno-omit-frame-pointer -Wstack-usage=8192 -pie -fPIE -Werror=vla \
            -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
-INCLUDES = -I./include -I./libs/logger
+INCLUDES = -I./include -I./libs/logger -I./common
 
 BUILD_DIR = build
 EXECUTABLE = do
 
-SOURCES = src/main.cpp src/read_tree.cpp src/diff_tree.cpp graphiz/graph_dump.cpp src/lexical_analysis.cpp src/syntaxis_analysis.cpp
+SOURCES = src/main.cpp src/read_expr.cpp src/diff_tree.cpp graphiz/graph_dump.cpp src/lexical_analysis.cpp src/syntaxis_analysis.cpp
 
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SOURCES:%.cpp=%.o))
 DEPENDS = $(OBJECTS:.o=.d)
@@ -40,5 +40,13 @@ $(LOGGER_LIB):
 clean:
 	@rm -rf $(BUILD_DIR) $(EXECUTABLE)
 	@$(MAKE) -C libs/logger clean
+
+clean-img:
+	@rm -f graphiz/img/*.png
+	@echo -e "\033[36m Deleted all PNG files in graphiz/img \033[0m"
+
+clean-dot:
+	@rm -f graphiz/dot/*.dot
+	@echo -e "\033[36m Deleted all DOT files in graphiz/dot \033[0m"
 
 -include $(DEPENDS)

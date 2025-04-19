@@ -17,14 +17,10 @@ int main()
     const char* file_expr = "expr.txt";
     const char* file_expr2 = "expr2.txt";
 
-    Lexeme *lexeme_array = InitLexemeArray(file_expr2);
-    PrintLexemes(lexeme_array);
-
-    size_t cur = 0;
-    Node *node_G = GetG(lexeme_array, &cur);
+    Node *node_G = ReadExpression(file_expr2);
     TreeDumpDot2(node_G);
-    DeinitLexemes(lexeme_array);
     FreeTree(&node_G);
+
     size_t file_size = 0;
     char *buffer = ReadFileToBuffer(file_expr, &file_size);
     if (!buffer)
@@ -52,8 +48,8 @@ int main()
 
     Node *c_node = CopyTree(root);
     Node *d_node = Diff(c_node);
-    TreeDumpDot2(d_node);
-    TreeDumpDot(d_node);
+    // TreeDumpDot2(d_node);
+    // TreeDumpDot(d_node);
 
     FreeTree(&d_node);
     FreeTree(&c_node);

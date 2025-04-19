@@ -5,9 +5,11 @@
 #include "lexical_analysis.h"
 #include "logger.h"
 #include "read_tree.h"
+#include "colors.h"
 
 const size_t lexeme_array_size = 100;
 bool GetOperation(Lexeme *lexeme_array, size_t lexeme_ip, const char **cur);
+void SkipSpaces(const char **buffer);
 
 void SkipSpaces(const char **buffer)
 {
@@ -79,7 +81,6 @@ Lexeme* StringToLexemes(const char *str)
     return lexeme_array;
 }
 
-
 bool GetOperation(Lexeme *lexeme_array, size_t lexeme_ip, const char **cur)
 {
     assert(lexeme_array);
@@ -107,16 +108,18 @@ void PrintLexemes(const Lexeme *lexeme_array)
 {
     assert(lexeme_array);
 
-    printf("Lexemes:\n");
+    printf(BLUB " //***********************Lexemes***********************// " RESET "\n\n");
 
-    for (size_t i = 0; i < 15; i++)
+    for (size_t i = 0; i < 15; i++) //TODO size
     {
         const Lexeme *lex = &lexeme_array[i];
+
+        printf(GREEN "  [%2zu] " RESET, i);
 
         switch (lex->type)
         {
             case LEX_NUM:
-                printf("  [%zu] NUM: %lf\n", i, lex->value.num);
+                printf(CYAN "NUM     " RESET ": " BLUE "%lf" RESET "\n", lex->value.num);
                 break;
 
             case LEX_OP:
@@ -124,34 +127,37 @@ void PrintLexemes(const Lexeme *lexeme_array)
                 {
                     if (operations[j].op == lex->value.op)
                     {
-                        printf("  [%zu] OP: '%s'\n", i, operations[j].symbol);
+                        printf(MAGENTA "OP      " RESET ": '" MAGENTA "%s" RESET "'\n", operations[j].symbol);
                         break;
                     }
                 }
                 break;
 
             case LEX_VAR:
-                printf("  [%zu] VAR index: %zu\n", i, (size_t)lex->value.num);
+                printf(GREEN "VAR     " RESET ": index " GREEN "%zu" RESET "\n", (size_t)lex->value.num);
                 break;
 
             case LEX_LBRACKET:
-                printf("  [%zu] LBRACKET: '('\n", i);
+                printf(YELLOW "LBRACK  " RESET ": '" YELLOW "('" RESET "\n");
                 break;
 
             case LEX_RBRACKET:
-                printf("  [%zu] RBRACKET: ')'\n", i);
+                printf(YELLOW "RBRACK  " RESET ": '" YELLOW ")'" RESET "\n");
                 break;
 
             case LEX_END:
-                printf("  [%zu] END\n", i);
+                printf(RED "END     " RESET "\n");
                 break;
 
             default:
-                printf("  [%zu] UNKNOWN type: %d\n", i, lex->type);
+                printf(REDB " UNKNOWN " RESET " type: %d\n", lex->type);
                 break;
         }
     }
+
+    printf("\n");
 }
+
 
 Lexeme* InitLexemeArray(const char* file_expr)
 {

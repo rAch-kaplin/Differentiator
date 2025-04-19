@@ -10,5 +10,6 @@ void FreeTree(Node** node);
 CodeError CreateNode(Node **dest, const char *data, Node *parent);
 NodeType DetectNodeType(const char *str);
 void SkipSpaces(char **buffer);
+Node* ReadExpression(const char *file_expr);
 
 #endif //_READ_TREE
