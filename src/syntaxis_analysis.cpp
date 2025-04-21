@@ -83,7 +83,7 @@ Node* GetD(Lexeme *lexeme_array, size_t *cur)
         Node *node2 = GetD(lexeme_array, cur);
         node = _POW(node, node2);
     }
-    
+
     return node;
 }
 
@@ -114,6 +114,7 @@ Node* GetP(Lexeme *lexeme_array, size_t *cur)
             (*cur)++;
             return node;
         }
+        case LEX_FUNC:
         case LEX_VAR:
         case LEX_END:
         case LEX_RBRACKET:

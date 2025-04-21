@@ -7,9 +7,14 @@
 #include "read_tree.h"
 #include "colors.h"
 
-const size_t lexeme_array_size = 100;
+const size_t lexeme_array_size = 1000;
 bool GetOperation(Lexeme *lexeme_array, size_t lexeme_count, const char **cur);
 void SkipSpaces(const char **buffer);
+
+static void AddLexeme(Lexeme *lexeme_array, size_t *lexeme_count, LexemeType type, double value);
+static bool IsNum(const char *cur);
+static bool IsFunc(const char *name);
+static Func GetFuncType(const char* func_name);
 
 void SkipSpaces(const char **buffer)
 {
@@ -37,29 +42,23 @@ Lexeme* StringToLexemes(const char *str)
 
         if (*cur == '(')
         {
-            lexeme_array[lexeme_count].type = LEX_LBRACKET;
-            lexeme_array[lexeme_count].value.num = '('; //FIXME
+            AddLexeme(lexeme_array, &lexeme_count, LEX_LBRACKET, '(');
             cur++;
-            lexeme_count++;
             continue;
         }
         else if (*cur == ')')
         {
-            lexeme_array[lexeme_count].type = LEX_RBRACKET;
-            lexeme_array[lexeme_count].value.num = ')';
+            AddLexeme(lexeme_array, &lexeme_count, LEX_RBRACKET, ')');
             cur++;
-            lexeme_count++;
             continue;
         }
         else if (*cur == '$')
         {
-            lexeme_array[lexeme_count].type = LEX_END;
-            lexeme_array[lexeme_count].value.num = '$';
+            AddLexeme(lexeme_array, &lexeme_count, LEX_END, '&');
             cur++;
-            lexeme_count++;
             continue;
         }
-        else if (isdigit(*cur)) //TODO check -
+        else if (IsNum(cur)) //TODO wrapper
         {
             lexeme_array[lexeme_count].type = LEX_NUM;
             char *end_num = nullptr;
@@ -68,17 +67,95 @@ Lexeme* StringToLexemes(const char *str)
             lexeme_count++;
             continue;
         }
-        else if (isalpha(*cur))
-        {
-            continue; //FIXME
-        }
+
         else if (GetOperation(lexeme_array, lexeme_count, &cur))
         {
             lexeme_count++;
             continue;
         }
+
+        else if (isalpha(*cur))
+        {
+            const char *start = cur;
+            while (isalpha(*cur)) cur++;
+
+            size_t name_len = cur - start;
+
+            char *name = (char*)calloc(name_len  + 1, sizeof(char));
+            if (name == nullptr)
+            {
+                LOG(LOGL_ERROR, "Memory was not allocated");
+                return nullptr;
+            }
+            strncpy(name, start, name_len);
+                name[name_len] = '\0';
+
+            if (IsFunc(name))
+            {
+                lexeme_array[lexeme_count].type = LEX_FUNC;
+                lexeme_array[lexeme_count].value.func = GetFuncType(name);
+                LOG(LOGL_DEBUG, "FUNC: <%s>", name);
+                lexeme_count++;
+            }
+
+            else
+            {
+                Variable* vars_table = GetVarsTable();
+                size_t var_pos = AddVartable(vars_table, name, name_len);
+                LOG(LOGL_DEBUG, "VAR: <%s>", name);
+                lexeme_array[lexeme_count].type = LEX_VAR;
+                lexeme_count++;
+            }
+
+            free(name);
+            continue; //FIXME
+        }
     }
     return lexeme_array;
+}
+
+static Func GetFuncType(const char* func_name)
+{
+    assert(func_name != nullptr);
+
+    for (size_t i = 0; i < size_of_func; i++)
+    {
+        if (strcmp(func_name, func[i].name) == 0)
+        {
+            return func[i].func;
+        }
+    } // FIXME unknow function
+}
+
+static bool IsFunc(const char *name)
+{
+    assert(name);
+
+    const char *functions[] = {"sin", "cos", "tan", "ln"};
+
+    for (int i = 0; i < sizeof(functions) / sizeof(functions[0]); i++)
+    {
+        if (strcmp(name, functions[i]) == 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool IsNum(const char *cur)
+{
+    assert(cur);
+    return (isdigit(*cur) || (*cur == '-' && isdigit(*(cur + 1))));
+}
+
+static void AddLexeme(Lexeme *lexeme_array, size_t *lexeme_count, LexemeType type, double value)
+{
+    assert(lexeme_array && lexeme_count);
+
+    lexeme_array[*lexeme_count].type = type;
+    lexeme_array[*lexeme_count].value.num = value;
+    (*lexeme_count)++;
 }
 
 bool GetOperation(Lexeme *lexeme_array, size_t lexeme_count, const char **cur)
@@ -128,6 +205,17 @@ void PrintLexemes(const Lexeme *lexeme_array)
                     if (operations[j].op == lex->value.op)
                     {
                         printf(MAGENTA "OP      " RESET ": '" MAGENTA "%s" RESET "'\n", operations[j].symbol);
+                        break;
+                    }
+                }
+                break;
+
+            case LEX_FUNC:
+                for (size_t j = 0; j < size_of_func; j++)
+                {
+                    if (func[j].func == lex->value.func)
+                    {
+                        printf(MAGENTA "OP      " RESET ": '" MAGENTA "%s" RESET "'\n", func[j].name);
                         break;
                     }
                 }

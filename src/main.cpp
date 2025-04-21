@@ -36,7 +36,7 @@ int main(int argc, const char* argv[]) //TODO not const
 
     Node *node_G = ReadExpression(file_expr2);
     TreeDumpDot2(node_G);
-    printf("%lg\n", Eval(node_G));
+    //printf("%lg\n", Eval(node_G));
     FreeTree(&node_G);
 
     size_t file_size = 0;

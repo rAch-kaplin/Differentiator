@@ -9,10 +9,26 @@ typedef enum LexemeType
     LEX_NUM,
     LEX_OP,
     LEX_VAR,
+    LEX_FUNC,
     LEX_LBRACKET,
     LEX_RBRACKET,
     LEX_END
 } LexemeType;
+
+typedef struct Function
+{
+    Func func;
+    const char* name;
+} Function;
+
+static const Function func[] =
+{
+    {SIN, "sin"},
+    {COS, "cos"},
+    {LOG,  "ln"}
+};
+
+const size_t size_of_func = sizeof(func) / sizeof(func[0]);
 
 typedef struct Lexeme
 {
@@ -22,6 +38,7 @@ typedef struct Lexeme
     {
         double num;
         Op op;
+        Func func;
     } value;
 } Lexeme;
 

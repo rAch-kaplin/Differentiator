@@ -85,9 +85,14 @@ double Eval(Node *node)
     if (node->type == VAR) return Global_x;
     if (node->type == OP)
     {
-
+    /**************************************************************************************************************************
+    In this project you can see the use of DSL rules. The project uses this as an experiment
+    (for training purposes). It is better not to use it here, because not so many conditions need to be checked,
+     also it is used in one file. In this case you should not do that, keep another file with rules.
+    ***************************************************************************************************************************
+    */
         #define DEF_OPER(oper, eval_rule, ...) case oper: return eval_rule;
-        switch (node->value.op)  //TODO disclaimer
+        switch (node->value.op)
         {
             #include "diff_rules_DSL.h"
 
