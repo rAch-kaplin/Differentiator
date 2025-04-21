@@ -139,6 +139,10 @@ Node* GetP(Lexeme *lexeme_array, size_t *cur)
             (*cur)++;
             return node;
         }
+        case LEX_OP:
+        case LEX_RBRACKET:
+        case LEX_END:
+            break;
 
         default:
         {

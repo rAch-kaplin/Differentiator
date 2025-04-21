@@ -4,9 +4,10 @@
 #include <string.h>
 #include <assert.h>
 
-#include "read_tree.h"
+#include "file_read.h"
 #include "logger.h"
 #include "lexical_analysis.h"
+#include "tree_func.h"
 
 const size_t size_op = 32;
 

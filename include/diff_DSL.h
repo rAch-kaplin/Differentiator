@@ -2,6 +2,7 @@
 #define _DIFF_DCL
 
 #include "diff_tree.h"
+#include "tree_func.h"
 
 #define _ELEFT  Eval(node -> left)
 #define _ERIGHT Eval(node -> right)

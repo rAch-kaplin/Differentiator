@@ -3,11 +3,13 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "read_tree.h"
+#include "file_read.h"
+#include "tree_func.h"
 #include "diff_tree.h"
 #include "logger.h"
 #include "lexical_analysis.h"
 #include "syntaxis_analysis.h"
+
 #include "arg_parser.h"
 #include "colors.h"
 
@@ -35,39 +37,37 @@ int main(int argc, const char* argv[]) //TODO not const
         return 1;
     }
 
-    const char *file_expr2 = "expr2.txt";
-
-    Node *node_G = ReadExpression(file_expr2);
+    Node *node_G = ReadExpression(file_expr);
     TreeDumpDot2(node_G);
     //printf("%lg\n", Eval(node_G));
     FreeTree(&node_G);
 
-    size_t file_size = 0;
-    char *buffer = ReadFileToBuffer(file_expr, &file_size);
-    if (!buffer)
-    {
-        fprintf(stderr, "Failed to read input file.\n");
-        return 1;
-    }
+//     size_t file_size = 0;
+//     char *buffer = ReadFileToBuffer(file_expr, &file_size);
+//     if (!buffer)
+//     {
+//         fprintf(stderr, "Failed to read input file.\n");
+//         return 1;
+//     }
+//
+//     char *ptr = buffer;
+//     Node *root = NULL;
+//
+//     ParseMathExpr(&root, &ptr, NULL);
+//     free(buffer);
+//
+//     if (!root)
+//     {
+//         fprintf(stderr, "Failed to parse expression.\n");
+//         return 1;
+//     }
+//
+//     printf("Expression parsed successfully.\n");
 
-    char *ptr = buffer;
-    Node *root = NULL;
-
-    ParseMathExpr(&root, &ptr, NULL);
-    free(buffer);
-
-    if (!root)
-    {
-        fprintf(stderr, "Failed to parse expression.\n");
-        return 1;
-    }
-
-    printf("Expression parsed successfully.\n");
-
-    TreeDumpDot2(root);
-    printf("%lg\n", Eval(root));
-
-    FreeTree(&root);
+//     TreeDumpDot2(root);
+//     printf("%lg\n", Eval(root));
+//
+//     FreeTree(&root);
     FreeVarsTable();
 
     LoggerDeinit();
@@ -83,7 +83,7 @@ void FreeVarsTable()
         LOG(LOGL_DEBUG, "free ---> %s ", vars_table[i].name);
         if (vars_table[i].name != nullptr)
         {
-            free((char*)(vars_table[i].name));
+            free((vars_table[i].name));
             vars_table[i].name = nullptr;
         }
     }

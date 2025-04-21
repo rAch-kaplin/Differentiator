@@ -3,7 +3,8 @@
 #include <cmath>
 #include <stdlib.h>
 
-#include "read_tree.h"
+#include "file_read.h"
+#include "tree_func.h"
 #include "diff_tree.h"
 #include "diff_DSL.h"
 #include "logger.h"

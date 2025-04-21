@@ -15,21 +15,6 @@ typedef enum LexemeType
     LEX_END
 } LexemeType;
 
-typedef struct Function
-{
-    Func func;
-    const char* name;
-} Function;
-
-static const Function func[] =
-{
-    {SIN, "sin"},
-    {COS, "cos"},
-    {LOG,  "ln"}
-};
-
-const size_t size_of_func = sizeof(func) / sizeof(func[0]);
-
 typedef struct Lexeme
 {
     LexemeType type;

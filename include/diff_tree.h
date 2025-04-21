@@ -16,6 +16,8 @@ enum CodeError
     INVALID_NODE_TYPE   = 0x06,
 };
 
+/**************************ENUMS**************************************************************************/
+
 enum NodeType
 {
     OP,
@@ -34,17 +36,7 @@ enum Func
     SIN, COS, LOG,
 };
 
-typedef struct Operation
-{
-    Op op;
-    const char* symbol;
-} Operation;
-
-typedef struct Variable
-{
-    const char *name;
-    size_t len_name;
-} Variable;
+/*************************NODE******************************************************************************/
 
 union NodeValue
 {
@@ -65,6 +57,19 @@ typedef struct Node
     struct Node* parent;
 } Node;
 
+typedef struct Variable
+{
+    char *name;
+    size_t len_name;
+} Variable;
+
+
+typedef struct Operation
+{
+    Op op;
+    const char* symbol;
+} Operation;
+
 static const Operation operations[] =
 {
     {ADD, "+"},
@@ -77,13 +82,24 @@ static const Operation operations[] =
 
 const size_t size_of_operations = sizeof(operations) / sizeof(operations[0]);
 
-Node* NewNode(NodeType type, NodeValue value, Node* left, Node* right);
+typedef struct Function
+{
+    Func func;
+    const char* name;
+} Function;
+
+static const Function func[] =
+{
+    {SIN, "sin"},
+    {COS, "cos"},
+    {LOG,  "ln"}
+};
+
+const size_t size_of_func = sizeof(func) / sizeof(func[0]);
+
 double Eval(Node *node);
 Node* Diff(Node *node);
 Node* CopyTree(Node *root);
-
-CodeError TreeDumpDot(Node* root);
-CodeError TreeDumpDot2(Node* root);
 
 bool CheckVars(Node* node);
 
