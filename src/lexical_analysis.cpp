@@ -104,6 +104,7 @@ Lexeme* StringToLexemes(const char *str)
                 size_t var_pos = AddVartable(vars_table, name, name_len);
                 LOG(LOGL_DEBUG, "VAR: <%s>", name);
                 lexeme_array[lexeme_count].type = LEX_VAR;
+                lexeme_array[lexeme_count].value.var = var_pos;
                 lexeme_count++;
             }
 
@@ -215,14 +216,14 @@ void PrintLexemes(const Lexeme *lexeme_array)
                 {
                     if (func[j].func == lex->value.func)
                     {
-                        printf(MAGENTA "OP      " RESET ": '" MAGENTA "%s" RESET "'\n", func[j].name);
+                        printf(MAGENTA "FUNC    " RESET ": '" MAGENTA "%s" RESET "'\n", func[j].name);
                         break;
                     }
                 }
                 break;
 
             case LEX_VAR:
-                printf(GREEN "VAR     " RESET ": index " GREEN "%zu" RESET "\n", (size_t)lex->value.num);
+                printf(GREEN "VAR     " RESET ": index " GREEN "%zu" RESET "\n", lex->value.var);
                 break;
 
             case LEX_LBRACKET:

@@ -92,12 +92,37 @@ Node* GetP(Lexeme *lexeme_array, size_t *cur)
     assert(lexeme_array);
 
     LOG(LOGL_DEBUG, "Logged in func GetP()");
-    //printf("cur = <%zu>\n", *cur);
+    printf("cur = <%zu>\n", *cur);
+
     switch (lexeme_array[*cur].type)
     {
         case LEX_NUM:
-        {
             return _NUM(lexeme_array[(*cur)++].value.num);
+
+        case LEX_VAR:
+            return _VAR(lexeme_array[(*cur)++].value.var);
+
+        case LEX_FUNC:
+        {
+            Func func_type = lexeme_array[(*cur)++].value.func;
+
+            if (lexeme_array[*cur].type != LEX_LBRACKET)
+            {
+                fprintf(stderr, "Syntax error: expected '(' after function at pos %zu\n", *cur);
+                return nullptr;
+            }
+
+            (*cur)++;
+            Node *arg = GetE(lexeme_array, cur);
+
+            if (lexeme_array[*cur].type != LEX_RBRACKET)
+            {
+                fprintf(stderr, "Syntax error: expected ')' after function argument at pos %zu\n", *cur);
+                return nullptr;
+            }
+
+            (*cur)++;
+            return _FUNC(func_type, arg);
         }
 
         case LEX_LBRACKET:
@@ -114,17 +139,11 @@ Node* GetP(Lexeme *lexeme_array, size_t *cur)
             (*cur)++;
             return node;
         }
-        case LEX_FUNC:
-        case LEX_VAR:
-        case LEX_END:
-        case LEX_RBRACKET:
-        case LEX_OP:
-            break; //FIXME
 
         default:
         {
             fprintf(stderr, "Syntax error: unexpected lexeme type '%d' at position %zu\n",
-            lexeme_array[*cur].type, *cur);
+                    lexeme_array[*cur].type, *cur);
             return nullptr;
         }
     }

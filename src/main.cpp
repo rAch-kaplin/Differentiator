@@ -11,6 +11,9 @@
 #include "arg_parser.h"
 #include "colors.h"
 
+const size_t MAX_VARS = 10;
+void FreeVarsTable();
+
 int main(int argc, const char* argv[]) //TODO not const
 {
     const char* log_file = "logfile.log";
@@ -65,8 +68,23 @@ int main(int argc, const char* argv[]) //TODO not const
     printf("%lg\n", Eval(root));
 
     FreeTree(&root);
+    FreeVarsTable();
 
     LoggerDeinit();
     printf("End main!\n");
 }
 
+void FreeVarsTable()
+{
+    Variable* vars_table = GetVarsTable();
+
+    for (size_t i = 0; i < MAX_VARS; i++)
+    {
+        LOG(LOGL_DEBUG, "free ---> %s ", vars_table[i].name);
+        if (vars_table[i].name != nullptr)
+        {
+            free((char*)(vars_table[i].name));
+            vars_table[i].name = nullptr;
+        }
+    }
+}

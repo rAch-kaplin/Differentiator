@@ -6,6 +6,7 @@
 
 #include "read_tree.h"
 #include "logger.h"
+#include "lexical_analysis.h"
 
 const size_t size_op = 32;
 
@@ -54,7 +55,21 @@ const char* GetNodeLabel(const Node* node)
             break;
         }
         case FUNC:
-            break; //TODO
+        {
+            const char* func_name = nullptr;
+
+            for (size_t i = 0; i < sizeof(func) / sizeof(func[0]); i++)
+            {
+                if (func[i].func == node->value.func)
+                {
+                    func_name = func[i].name;
+                    break;
+                }
+            }
+
+            snprintf(label, sizeof(label), "%s", func_name ? func_name : "Unknow");
+            break;
+        }
         default:
         {
             snprintf(label, sizeof(label), "UNKNOWN");

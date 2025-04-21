@@ -10,7 +10,9 @@
 #define _VAR(x) NewNode(VAR, (NodeValue){.var = (x)}, nullptr, nullptr)
 
 #define OP_VALUE(oper)   NodeValue {.op   = (oper)}
-#define FUNC_VALUE(func) NodeValue {.func = (func)}
+
+#define _FUNC(func_type, arg) NewNode(FUNC,  (NodeValue){.func = (func_type)}, nullptr, arg)
+#define _OP(op, a, b) NewNode(OP, (NodeValue){.op = (op)}, a, b)
 
 #define _ADD(a, b) NewNode(OP, OP_VALUE(ADD), a, b)
 #define _SUB(a, b) NewNode(OP, OP_VALUE(SUB), a, b)

@@ -39,6 +39,7 @@ typedef struct Lexeme
         double num;
         Op op;
         Func func;
+        size_t var;
     } value;
 } Lexeme;
 
