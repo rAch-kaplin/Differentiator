@@ -44,9 +44,25 @@ int main(int argc, const char* argv[]) //TODO not const
         fprintf(stderr, "ERROR! check log file\n");
     }
     TreeDumpDot2(node_G);
-    //printf("%lg\n", Eval(node_G));
-    FreeTree(&node_G);
 
+    Node *diff_node = CopyTree(node_G);
+    Node *diff_result = Diff(diff_node);
+    if (diff_result == nullptr)
+    {
+        fprintf(stderr, "Diff() return nullptr node\n");
+        FreeTree(&diff_node);
+        FreeTree(&diff_result);
+        FreeTree(&node_G);
+        return -1;
+    }
+    TreeDumpDot2(diff_result);
+    
+    FreeTree(&diff_node);
+    FreeTree(&diff_result);
+
+    printf("%lg\n", Eval(node_G));
+
+    FreeTree(&node_G);
     FreeVarsTable();
 
     LoggerDeinit();

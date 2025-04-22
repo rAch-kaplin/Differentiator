@@ -2,7 +2,7 @@
 #define _LEXICAL_ANALYSIS
 
 #include "diff_tree.h"
-#include "diff_rules_DSL.h"
+// #include "diff_rules_DSL.h"
 
 typedef enum LexemeType
 {

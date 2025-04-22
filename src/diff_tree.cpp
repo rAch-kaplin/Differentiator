@@ -20,13 +20,14 @@ bool DivOptimisation(Node **node);
 bool PowOptimisation(Node **node);
 bool CompareDoubles(double value1, double value2);
 
-void Optimize(Node **node);
 void ReplaceWithOne(Node **node);
 
 bool IsNum(const Node *node);
 
 const double EPSILON = 1e-10;
 const size_t MAX_VARS = 10;
+
+//#define _LOG(b)    NewNode(FUNC, NodeValue {.func = (LN)}, nullptr, b)
 
 Variable* GetVarsTable() //TODO struct
 {
@@ -68,8 +69,14 @@ size_t AddVartable(Variable *vars_table, const char* name, size_t len_name)
 
 bool CheckVars(Node* node)
 {
-    return node && node->type == VAR;
+    if (!node) return false;
+    if (node->type == VAR) return true;
+    if (node->type == NUM) return false;
+    if (node->type == OP || node->type == FUNC)
+        return CheckVars(node->left) || CheckVars(node->right);
+    return false;
 }
+
 
 bool CompareDoubles(double value1, double value2)
 {
@@ -80,6 +87,7 @@ double Eval(Node *node)
 {
     assert(node);
 
+    LOG(LOGL_DEBUG, "Eval node");
     if (node->type == NUM) return node->value.num;
     if (node->type == VAR) return Global_x;
     if (node->type == OP)
@@ -94,7 +102,12 @@ double Eval(Node *node)
         #define DEF_OPER(oper, eval_rule, ...) case oper: return eval_rule;
         switch (node->value.op)
         {
-            #include "diff_rules_DSL.h"
+            // #include "diff_rules_DSL.h"
+            case ADD: return _ELEFT + _ERIGHT;
+            case SUB: return _ELEFT - _ERIGHT;
+            case MUL: return _ELEFT * _ERIGHT;
+            case DIV: return _ELEFT / _ERIGHT;
+            case POW: return pow(_ELEFT, _ERIGHT);
 
             default:
                 LOG(LOGL_ERROR,"Error: Unknown operation");
@@ -107,7 +120,15 @@ double Eval(Node *node)
         #define DEF_FUNC(func, eval_rule, ...) case func: return eval_rule;
         switch (node->value.func)
         {
-            #include "diff_rules_DSL.h"
+            // #include "diff_rules_DSL.h"
+
+            case SIN:
+                return sin(_ERIGHT);
+            case COS:
+                return cos(_ERIGHT);
+            case LN:
+                return log(_ERIGHT);
+
 
             default:
                 LOG(LOGL_ERROR,"Error: Unknown operation");
@@ -136,17 +157,53 @@ Node* Diff(Node *node)
 {
     assert(node);
 
+    LOG(LOGL_DEBUG, "Diff node");
     if (node->type == NUM) return _NUM(0);
+    LOG(LOGL_ERROR,"NUM: %d", node->value.num);
+
     if (node->type == VAR) return _NUM(1);
+    LOG(LOGL_ERROR,"VAR: %d", node->value.var);
+
     if (node->type == OP)
     {
-        #define DEF_OPER(oper, eval_rule, diff_rule, ...) case oper: diff_rule
+        #define DEF_OPER(oper, eval_rule, diff_rule, ...) case oper: diff_rule;
+
+        LOG(LOGL_ERROR,"OP: %d", node->value.op);
         switch (node->value.op)
         {
-            #include "diff_rules_DSL.h"
+            // #include "diff_rules_DSL.h"
+
+            case ADD:
+                return _ADD(dL, dR);
+            case SUB:
+                return _SUB(dL, dR);
+            case MUL:
+                return _ADD(_MUL(dL, CR), _MUL(CL, dR));
+            case DIV:
+                return _DIV(_SUB(_MUL(dL, CR), _MUL(CL, dR)), _MUL(CR, CR));
+            case POW:
+            {
+                bool var_in_base   = CheckVars(node->left);
+                bool var_in_degree = CheckVars(node->right);
+
+                if (var_in_base && var_in_degree)
+                {
+                    return _MUL(_ADD( _MUL(dR, _LOG(CL)),_DIV(_MUL(dL, CR), CL)), _POW(CL, CR));
+                }
+                if (var_in_base)
+                {
+                    return _MUL(dL,  _MUL(CR, _POW(CL, _SUB(CR, _NUM(1)))));
+                }
+                if (var_in_degree)
+                {
+                    return _MUL( _POW(CL, CR),  _MUL(dR, _LOG(CL)));
+                }
+
+                return nullptr;
+            }
 
             default:
-                LOG(LOGL_ERROR,"Error: Unknown operation");
+                LOG(LOGL_ERROR,"Error: Unknown operation %d", node->value.op);
                 return nullptr;
         }
         #undef DEF_OPER
@@ -154,9 +211,18 @@ Node* Diff(Node *node)
     if (node->type == FUNC)
     {
         #define DEF_FUNC(func, eval_rule, diff_rule, ...) case func: diff_rule
+
+        LOG(LOGL_ERROR,"FUNC: %d", node->value.func);
         switch (node->value.func)
         {
-            #include "diff_rules_DSL.h"
+            // #include "diff_rules_DSL.h"
+
+            case SIN:
+                return _MUL(_COS(CR), dR);
+            case COS:
+                return _MUL(_MUL(_NUM(-1), _SIN(CR)), dR);
+            case LN:
+                return _DIV(dR, CR);
 
             default:
                 LOG(LOGL_ERROR,"Error: Unknown func");

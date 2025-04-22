@@ -33,7 +33,7 @@ enum Op
 
 enum Func
 {
-    SIN, COS, LOG,
+    SIN, COS, LN,
 };
 
 /*************************NODE******************************************************************************/
@@ -92,7 +92,7 @@ static const Function func[] =
 {
     {SIN, "sin"},
     {COS, "cos"},
-    {LOG,  "ln"}
+    { LN,  "ln"}
 };
 
 const size_t size_of_func = sizeof(func) / sizeof(func[0]);
@@ -106,5 +106,6 @@ bool CheckVars(Node* node);
 Variable* GetVarsTable();
 size_t LookupVar(Variable *vars_table, const char* name, size_t len_name);
 size_t AddVartable(Variable *vars_table, const char* name, size_t len_name);
+void Optimize(Node **node);
 
 #endif //_DIFF_TREE

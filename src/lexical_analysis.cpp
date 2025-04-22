@@ -16,6 +16,8 @@ static bool IsNum(const char *cur);
 static bool IsFunc(const char *name);
 static Func GetFuncType(const char* func_name);
 
+Lexeme* StringToLexemes(const char *str, size_t *lexeme_count);
+
 void SkipSpaces(const char **buffer)
 {
     while (isspace(**buffer)) (*buffer)++;
@@ -184,7 +186,7 @@ void PrintLexemes(const Lexeme *lexeme_array, size_t lexeme_count)
 
     printf(BLUB " //***********************Lexemes***********************// " RESET "\n\n");
 
-    for (size_t i = 0; i < lexeme_count; i++) 
+    for (size_t i = 0; i < lexeme_count; i++)
     {
         const Lexeme *lex = &lexeme_array[i];
 
