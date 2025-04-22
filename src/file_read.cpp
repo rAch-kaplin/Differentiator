@@ -14,16 +14,18 @@ const size_t BUFFER_SIZE = 10;
 
 Node* ReadExpression(const char *file_expr)
 {
-    Lexeme *lexeme_array = InitLexemeArray(file_expr);
+    size_t lexeme_count = 0;
+    Lexeme *lexeme_array = InitLexemeArray(file_expr, &lexeme_count);
     if (lexeme_array == nullptr)
     {
         LOG(LOGL_ERROR, "Lexeme_array was not allocated");
         return nullptr;
     }
-    PrintLexemes(lexeme_array);
+    PrintLexemes(lexeme_array, lexeme_count);
 
     size_t cur = 0;
     Node *node_G = GetG(lexeme_array, &cur);
+
     DeinitLexemes(lexeme_array);
 
     return node_G;

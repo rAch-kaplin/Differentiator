@@ -21,7 +21,7 @@ void SkipSpaces(const char **buffer)
     while (isspace(**buffer)) (*buffer)++;
 }
 
-Lexeme* StringToLexemes(const char *str)
+Lexeme* StringToLexemes(const char *str, size_t *lexeme_count)
 {
     Lexeme *lexeme_array = (Lexeme*)calloc(lexeme_array_size, sizeof(Lexeme));
     if (lexeme_array == nullptr)
@@ -33,44 +33,42 @@ Lexeme* StringToLexemes(const char *str)
     const char *cur = str;
     const char *end = strchr(str, '\0');
 
-    size_t lexeme_count = 0;
-
     while (cur < end)
     {
         SkipSpaces(&cur);
-        LOG(LOGL_DEBUG, "curr: %c ---> {%d}, ip = [%d]", *cur, *cur, lexeme_count);
+        LOG(LOGL_DEBUG, "curr: %c ---> {%d}, ip = [%d]", *cur, *cur, *lexeme_count);
 
         if (*cur == '(')
         {
-            AddLexeme(lexeme_array, &lexeme_count, LEX_LBRACKET, '(');
+            AddLexeme(lexeme_array, lexeme_count, LEX_LBRACKET, '(');
             cur++;
             continue;
         }
         else if (*cur == ')')
         {
-            AddLexeme(lexeme_array, &lexeme_count, LEX_RBRACKET, ')');
+            AddLexeme(lexeme_array, lexeme_count, LEX_RBRACKET, ')');
             cur++;
             continue;
         }
         else if (*cur == '$')
         {
-            AddLexeme(lexeme_array, &lexeme_count, LEX_END, '&');
+            AddLexeme(lexeme_array, lexeme_count, LEX_END, '&');
             cur++;
             continue;
         }
         else if (IsNum(cur)) //TODO wrapper
         {
-            lexeme_array[lexeme_count].type = LEX_NUM;
+            lexeme_array[*lexeme_count].type = LEX_NUM;
             char *end_num = nullptr;
-            lexeme_array[lexeme_count].value.num = strtod(cur, &end_num);
+            lexeme_array[*lexeme_count].value.num = strtod(cur, &end_num);
             cur = (const char*)end_num;
-            lexeme_count++;
+            (*lexeme_count)++;
             continue;
         }
 
-        else if (GetOperation(lexeme_array, lexeme_count, &cur))
+        else if (GetOperation(lexeme_array, *lexeme_count, &cur))
         {
-            lexeme_count++;
+            (*lexeme_count)++;
             continue;
         }
 
@@ -92,10 +90,10 @@ Lexeme* StringToLexemes(const char *str)
 
             if (IsFunc(name))
             {
-                lexeme_array[lexeme_count].type = LEX_FUNC;
-                lexeme_array[lexeme_count].value.func = GetFuncType(name);
+                lexeme_array[*lexeme_count].type = LEX_FUNC;
+                lexeme_array[*lexeme_count].value.func = GetFuncType(name);
                 LOG(LOGL_DEBUG, "FUNC: <%s>", name);
-                lexeme_count++;
+                (*lexeme_count)++;
             }
 
             else
@@ -103,9 +101,9 @@ Lexeme* StringToLexemes(const char *str)
                 Variable* vars_table = GetVarsTable();
                 size_t var_pos = AddVartable(vars_table, name, name_len);
                 LOG(LOGL_DEBUG, "VAR: <%s>", name);
-                lexeme_array[lexeme_count].type = LEX_VAR;
-                lexeme_array[lexeme_count].value.var = var_pos;
-                lexeme_count++;
+                lexeme_array[*lexeme_count].type = LEX_VAR;
+                lexeme_array[*lexeme_count].value.var = var_pos;
+                (*lexeme_count)++;
             }
 
             free(name);
@@ -160,29 +158,6 @@ static void AddLexeme(Lexeme *lexeme_array, size_t *lexeme_count, LexemeType typ
     (*lexeme_count)++;
 }
 
-// bool GetOperation(Lexeme *lexeme_array, size_t lexeme_count, const char **cur)
-// {
-//     assert(lexeme_array);
-//     assert(cur && *cur);
-//
-//     char ch = **cur;
-//     char symbol[2] = {ch, '\0'}; //FIXME
-//
-//     for (size_t i = 0; i < sizeof(operations) / sizeof(operations[0]); i++)
-//     {
-//         if (strcmp(symbol, operations[i].symbol) == 0)
-//         {
-//             lexeme_array[lexeme_count].type = LEX_OP;
-//             lexeme_array[lexeme_count].value.op = operations[i].op;
-//
-//             (*cur)++;
-//             return true;
-//         }
-//     }
-//
-//     return false;
-// }
-
 bool GetOperation(Lexeme *lexeme_array, size_t lexeme_count, const char **cur)
 {
     assert(lexeme_array);
@@ -190,7 +165,7 @@ bool GetOperation(Lexeme *lexeme_array, size_t lexeme_count, const char **cur)
 
     for (size_t i = 0; i < size_of_operations; i++)
     {
-        if (**cur == operations[i].symbol[0])  
+        if (**cur == operations[i].symbol[0])
         {
             lexeme_array[lexeme_count].type = LEX_OP;
             lexeme_array[lexeme_count].value.op = operations[i].op;
@@ -203,13 +178,13 @@ bool GetOperation(Lexeme *lexeme_array, size_t lexeme_count, const char **cur)
     return false;
 }
 
-void PrintLexemes(const Lexeme *lexeme_array)
+void PrintLexemes(const Lexeme *lexeme_array, size_t lexeme_count)
 {
     assert(lexeme_array);
 
     printf(BLUB " //***********************Lexemes***********************// " RESET "\n\n");
 
-    for (size_t i = 0; i < 15; i++) //TODO size
+    for (size_t i = 0; i < lexeme_count; i++) 
     {
         const Lexeme *lex = &lexeme_array[i];
 
@@ -269,7 +244,7 @@ void PrintLexemes(const Lexeme *lexeme_array)
 }
 
 
-Lexeme* InitLexemeArray(const char* file_expr)
+Lexeme* InitLexemeArray(const char* file_expr, size_t *lexeme_count)
 {
     assert(file_expr);
 
@@ -281,7 +256,7 @@ Lexeme* InitLexemeArray(const char* file_expr)
         return nullptr;
     }
 
-    Lexeme *lexeme_array = StringToLexemes(expr_buffer);
+    Lexeme *lexeme_array = StringToLexemes(expr_buffer, lexeme_count);
     free(expr_buffer);
 
     return lexeme_array;

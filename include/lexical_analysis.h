@@ -29,8 +29,8 @@ typedef struct Lexeme
 } Lexeme;
 
 Lexeme* StringToLexemes(const char *str);
-void PrintLexemes(const Lexeme *lexeme_array);
-Lexeme* InitLexemeArray(const char* file_expr);
+void PrintLexemes(const Lexeme *lexeme_array, size_t lexeme_count);
+Lexeme* InitLexemeArray(const char* file_expr, size_t *lexeme_count);
 void DeinitLexemes(Lexeme* lexeme_array);
 
 #endif // _LEXICAL_ANALYSIS

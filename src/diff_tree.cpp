@@ -56,12 +56,10 @@ size_t AddVartable(Variable *vars_table, const char* name, size_t len_name)
 {
     assert(vars_table && name);
 
-    char *str = strdup(name);
-
-    size_t pos = LookupVar(vars_table, str, len_name);
+    size_t pos = LookupVar(vars_table, name, len_name);
     if (vars_table[pos].name == nullptr)
     {
-        vars_table[pos].name = str;
+        vars_table[pos].name = strdup(name);
         vars_table[pos].len_name = len_name;
     }
 
@@ -86,12 +84,13 @@ double Eval(Node *node)
     if (node->type == VAR) return Global_x;
     if (node->type == OP)
     {
+
     /**************************************************************************************************************************
-    In this project you can see the use of DSL rules. The project uses this as an experiment
-    (for training purposes). It is better not to use it here, because not so many conditions need to be checked,
-     also it is used in one file. In this case you should not do that, keep another file with rules.
-    ***************************************************************************************************************************
-    */
+        In this project you can see the use of DSL rules. The project uses this as an experiment
+        (for training purposes). It is better not to use it here, because not so many conditions need to be checked,
+        also it is used in one file. In this case you should not do that, keep another file with rules.
+    ****************************************************************************************************************************/
+
         #define DEF_OPER(oper, eval_rule, ...) case oper: return eval_rule;
         switch (node->value.op)
         {

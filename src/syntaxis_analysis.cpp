@@ -17,7 +17,8 @@ Node* GetG(Lexeme *lexeme_array, size_t *cur)
     {
         fprintf(stderr, "Not find '$'\n");
         LOG(LOGL_ERROR, "Not find '$'");
-        assert(0); //FIXME
+
+        return nullptr;
     }
     return node;
 }
@@ -92,7 +93,7 @@ Node* GetP(Lexeme *lexeme_array, size_t *cur)
     assert(lexeme_array);
 
     LOG(LOGL_DEBUG, "Logged in func GetP()");
-    printf("cur = <%zu>\n", *cur);
+    // printf("cur = <%zu>\n", *cur);
 
     switch (lexeme_array[*cur].type)
     {
