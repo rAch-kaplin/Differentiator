@@ -245,15 +245,14 @@ void Optimize(Node **node)
         changed |= ConstFolding(*node);
         changed |= RemoveNeutralElems(node);
 
-    } while (changed);
+    } while (!changed);
 }
-
 
 bool ConstFolding(Node *node)
 {
     assert(node);
     bool changed = false;
-
+    LOG(LOGL_DEBUG, "Const folding()");
     if (node->left)
         changed |= ConstFolding(node->left);
     if (node->right)
@@ -279,17 +278,28 @@ bool RemoveNeutralElems(Node **node)
 {
     assert(node && *node);
 
-    if ((*node)->type != OP) return false;
+    bool changed = false;
 
+    if ((*node)->left)
+        changed |= RemoveNeutralElems(&(*node)->left);
+    if ((*node)->right)
+        changed |= RemoveNeutralElems(&(*node)->right);
+
+    if ((*node)->type != OP) return changed;
+
+    LOG(LOGL_DEBUG, "RemoveNeutralElems()");
     switch ((*node)->value.op)
     {
-        case ADD: return AddOptimisation(node);
-        case SUB: return SubOptimisation(node);
-        case MUL: return MulOptimisation(node);
-        case DIV: return DivOptimisation(node);
-        case POW: return PowOptimisation(node);
-        default:  return false;
+        case ADD: changed |= AddOptimisation(node); break;
+        case SUB: changed |= SubOptimisation(node); break;
+        case MUL: changed |= MulOptimisation(node); break;
+        case DIV: changed |= DivOptimisation(node); break;
+        case POW: changed |= PowOptimisation(node); break;
+
+        default: break;
     }
+
+    return changed;
 }
 
 void Replace(Node **node, Node *son)
@@ -297,8 +307,11 @@ void Replace(Node **node, Node *son)
     assert(node && *node);
 
     Node *temp = *node;
+
+    if (son == temp->left) temp->left = nullptr;
+    if (son == temp->right) temp->right = nullptr;
+
     *node = son;
-    temp->left = temp->right = nullptr;
     FreeTree(&temp);
 }
 
@@ -342,6 +355,7 @@ bool MulOptimisation(Node **node)
 {
     assert(node && *node);
 
+    LOG(LOGL_DEBUG, "MulOptimisation()");
     if (IsNum((*node)->left))
     {
         if (CompareDoubles((*node)->left->value.num, 1))

@@ -16,6 +16,8 @@
 const size_t MAX_VARS = 10;
 void FreeVarsTable();
 
+//   (3 * x^2) ^ (1/2) + sin ( ln ( cos (x^2) ) )$
+
 int main(int argc, const char* argv[]) //TODO not const
 {
     printf(GREEN "\nStart main! ============================================================================\n\n" RESET);
@@ -44,6 +46,8 @@ int main(int argc, const char* argv[]) //TODO not const
         fprintf(stderr, "ERROR! check log file\n");
     }
     TreeDumpDot2(node_G);
+    Optimize(&node_G);
+    TreeDumpDot2(node_G);
 
     Node *diff_node = CopyTree(node_G);
     Node *diff_result = Diff(diff_node);
@@ -56,7 +60,9 @@ int main(int argc, const char* argv[]) //TODO not const
         return -1;
     }
     TreeDumpDot2(diff_result);
-    
+    Optimize(&diff_result);
+    TreeDumpDot2(diff_result);
+
     FreeTree(&diff_node);
     FreeTree(&diff_result);
 
