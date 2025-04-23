@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "file_read.h"
 #include "tree_func.h"
@@ -21,6 +22,9 @@ void FreeVarsTable();
 int main(int argc, const char* argv[]) //TODO not const
 {
     printf(GREEN "\nStart main! ============================================================================\n\n" RESET);
+
+    clock_t start = clock();
+
     const char* log_file = "logfile.log";
     LoggerInit(LOGL_DEBUG, log_file, DEFAULT_MODE);
 
@@ -45,6 +49,7 @@ int main(int argc, const char* argv[]) //TODO not const
     {
         fprintf(stderr, "ERROR! check log file\n");
     }
+
     TreeDumpDot2(node_G);
     Optimize(&node_G);
     TreeDumpDot2(node_G);
@@ -72,6 +77,11 @@ int main(int argc, const char* argv[]) //TODO not const
     FreeVarsTable();
 
     LoggerDeinit();
+
+    clock_t end = clock();
+    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+    printf(MAGENTA "Execution time: %f seconds\n\n" RESET, time_spent);
+
     printf(GREEN "End main! ==============================================================================\n\n" RESET);
 }
 

@@ -80,7 +80,7 @@ bool CheckVars(Node* node)
 
 bool CompareDoubles(double value1, double value2)
 {
-    return (fabs(value1) - fabs(value2) < EPSILON);
+    return fabs(value1 - value2) < EPSILON;;
 }
 
 double Eval(Node *node)
@@ -234,7 +234,7 @@ Node* Diff(Node *node)
     return nullptr;
 }
 
-void Optimize(Node **node)
+void Optimize(Node **node) //TODO Rename
 {
     assert(node && *node);
 
@@ -324,7 +324,7 @@ bool AddOptimisation(Node **node)
 {
     assert(node && *node);
 
-    if (IsNum((*node)->left) && CompareDoubles((*node)->left->value.num, 0)) //TODO IsNum IsZero
+    if (IsNum((*node)->left) && CompareDoubles((*node)->left->value.num, 0))
     {
         Replace(node, (*node)->right);
         return true;
