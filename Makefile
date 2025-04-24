@@ -15,7 +15,7 @@ INCLUDES = -I./include -I./libs/logger -I./libs/arg_parser -I./common
 BUILD_DIR = build
 EXECUTABLE = do
 
-SOURCES = src/main.cpp src/file_read.cpp src/tree_func.cpp src/diff_tree.cpp graphiz/graph_dump.cpp src/lexical_analysis.cpp src/syntaxis_analysis.cpp
+SOURCES = src/main.cpp src/file_read.cpp src/tree_func.cpp src/diff_tree.cpp graphiz/graph_dump.cpp src/lexical_analysis.cpp src/syntaxis_analysis.cpp src/TeX_dump.cpp
 
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SOURCES:%.cpp=%.o))
 DEPENDS = $(OBJECTS:.o=.d)
