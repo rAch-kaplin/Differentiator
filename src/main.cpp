@@ -14,6 +14,8 @@
 #include "arg_parser.h"
 #include "colors.h"
 
+#include "TeX_dump.h"
+
 const size_t MAX_VARS = 10;
 void FreeVarsTable();
 
@@ -58,26 +60,31 @@ int main(int argc, const char* argv[]) //TODO not const
     }
 
     TreeDumpDot2(node_G);
-    WriteToTex(node_G, file_tex);
+
+    TeX tex = {};
+
+    WriteToTexStart(node_G, file_tex, &tex);
+    WriteToTexEnd  (node_G, file_tex, &tex);
+
     Optimize(&node_G);
     TreeDumpDot2(node_G);
 
-    // Node *diff_node = CopyTree(node_G);
-    // Node *diff_result = Diff(diff_node);
-    // if (diff_result == nullptr)
-    // {
-    //     fprintf(stderr, "Diff() return nullptr node\n");
-    //     FreeTree(&diff_node);
-    //     FreeTree(&diff_result);
-    //     FreeTree(&node_G);
-    //     return -1;
-    // }
-    // TreeDumpDot2(diff_result);
-    // Optimize(&diff_result);
-    // TreeDumpDot2(diff_result);
+    Node *diff_node = CopyTree(node_G);
+    Node *diff_result = Diff(diff_node);
+    if (diff_result == nullptr)
+    {
+        fprintf(stderr, "Diff() return nullptr node\n");
+        FreeTree(&diff_node);
+        FreeTree(&diff_result);
+        FreeTree(&node_G);
+        return -1;
+    }
+    TreeDumpDot2(diff_result);
+    Optimize(&diff_result);
+    TreeDumpDot2(diff_result);
 
-    // FreeTree(&diff_node);
-    // FreeTree(&diff_result);
+    FreeTree(&diff_node);
+    FreeTree(&diff_result);
 
     printf("%lg\n", Eval(node_G));
 

@@ -108,6 +108,4 @@ size_t LookupVar(Variable *vars_table, const char* name, size_t len_name);
 size_t AddVartable(Variable *vars_table, const char* name, size_t len_name);
 void Optimize(Node **node);
 
-void WriteToTex(Node *root, const char* filename_tex);
-
 #endif //_DIFF_TREE

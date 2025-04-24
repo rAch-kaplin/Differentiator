@@ -4,7 +4,7 @@
 #include "logger.h"
 #include "diff_tree.h"
 #include "tree_func.h"
-
+#include "TeX_dump.h"
 
 const size_t TeX_buffer_size = 4048;
 
@@ -26,12 +26,10 @@ static void HandleNumToTeX             (Node *node, char *buffer_TeX, int *cur_l
 static void HandleVarToTeX             (Node *node, char *buffer_TeX, int *cur_len);
 static int  GetOpPriority              (Op op);
 
-void WriteToTex(Node *root, const char* filename_tex)
+void WriteToTexStart(Node *root, const char* filename_tex, TeX *tex)
 {
     assert(root);
     assert(filename_tex);
-
-    int cur_len = 0;
 
     char *buffer_TeX = (char*)calloc(TeX_buffer_size, sizeof(char));
     if (buffer_TeX == nullptr)
@@ -39,34 +37,40 @@ void WriteToTex(Node *root, const char* filename_tex)
         LOG(LOGL_ERROR, "Memory was not allocated");
         return;
     }
+    tex->buffer_TeX = buffer_TeX;
 
-    _WRITE_NODE_TEX(buffer_TeX, &cur_len, "\\documentclass{article}\n");
-    _WRITE_NODE_TEX(buffer_TeX, &cur_len, "\\begin{document}\n");
-    _WRITE_NODE_TEX(buffer_TeX, &cur_len, "\n");
+    _WRITE_NODE_TEX(buffer_TeX, &(tex->cur_len), "\\documentclass{article}\n");
+    _WRITE_NODE_TEX(buffer_TeX, &(tex->cur_len), "\\begin{document}\n");
+    _WRITE_NODE_TEX(buffer_TeX, &(tex->cur_len), "\n");
 
+    WriteExpressionToTeX(root, buffer_TeX, &(tex->cur_len));
 
-    WriteExpressionToTeX(root, buffer_TeX, &cur_len);
+}
 
+void WriteToTexEnd(Node *root, const char* filename_tex, TeX *tex)
+{
+    assert(root);
+    assert(filename_tex);
 
-    _WRITE_NODE_TEX(buffer_TeX, &cur_len, "\n\n");
-    _WRITE_NODE_TEX(buffer_TeX, &cur_len, "\\end{document}\n");
+    _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\n\n");
+    _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\end{document}\n");
 
     FILE* tex_file = fopen(filename_tex, "w");
     if (tex_file == nullptr)
     {
         LOG(LOGL_ERROR, "Failed to open file %s for writing", filename_tex);
-        free(buffer_TeX);
+        free(tex->buffer_TeX);
         return;
     }
 
-    size_t written = fwrite(buffer_TeX, sizeof(char), (size_t)cur_len, tex_file);
-    if (written != (size_t)cur_len)
+    size_t written = fwrite(tex->buffer_TeX, sizeof(char), (size_t)(tex->cur_len), tex_file);
+    if (written != (size_t)(tex->cur_len))
     {
         LOG(LOGL_ERROR, "Failed to write full buffer to file");
     }
 
     fclose(tex_file);
-    free(buffer_TeX);
+    free(tex->buffer_TeX);
 
     LOG(LOGL_INFO, "Successfully wrote TeX expression to %s", filename_tex);
 }
@@ -79,24 +83,6 @@ void WriteExpressionToTeX(Node *root, char *buffer_TeX, int *cur_len)
     WriteNode(root, buffer_TeX, cur_len);
     _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\]");
     _WRITE_NODE_TEX(buffer_TeX, cur_len, "\n\n");
-
-//     Node *diff_node = CopyTree(root);
-//     Node *diff_result = Diff(diff_node);
-//     if (diff_result == nullptr)
-//     {
-//         fprintf(stderr, "Diff() return nullptr node\n");
-//         FreeTree(&diff_node);
-//         FreeTree(&diff_result);
-//         FreeTree(&root);
-//     }
-//     TreeDumpDot2(diff_result);
-//     Optimize(&diff_result);
-//     TreeDumpDot2(diff_result);
-//
-//     _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\[");
-//     WriteNode(diff_result, buffer_TeX, cur_len);
-//     _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\]");
-//     _WRITE_NODE_TEX(buffer_TeX, cur_len, "\n\n]");
 
 }
 
