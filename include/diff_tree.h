@@ -33,7 +33,7 @@ enum Op
 
 enum Func
 {
-    SIN, COS, LN,
+    SIN, COS, LN, UNKNOW
 };
 
 /*************************NODE******************************************************************************/
@@ -106,6 +106,6 @@ bool CheckVars(Node* node);
 Variable* GetVarsTable();
 size_t LookupVar(Variable *vars_table, const char* name, size_t len_name);
 size_t AddVartable(Variable *vars_table, const char* name, size_t len_name);
-void Optimize(Node **node);
+void Simplifications(Node **node);
 
 #endif //_DIFF_TREE

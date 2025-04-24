@@ -64,9 +64,11 @@ int main(int argc, const char* argv[]) //TODO not const
     TeX tex = {};
 
     WriteToTexStart(node_G, file_tex, &tex);
+
+    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{Original expression}\n\n");
     WriteExpressionToTeX(node_G, tex.buffer_TeX, &(tex.cur_len));
 
-    //Optimize(&node_G);
+    Simplifications(&node_G);
     TreeDumpDot2(node_G);
 
     Node *diff_node = CopyTree(node_G);
@@ -79,10 +81,17 @@ int main(int argc, const char* argv[]) //TODO not const
         FreeTree(&node_G);
         return -1;
     }
-    //TreeDumpDot(diff_result);
-    //Optimize(&diff_result);
-    //TreeDumpDot(diff_result);
 
+    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{After differentiation}\n\n");
+    WriteExpressionToTeX(diff_result, tex.buffer_TeX, &(tex.cur_len));
+
+    TreeDumpDot2(diff_result);
+    printf(YELLOW "%p\n" RESET, diff_result);
+    Simplifications(&diff_result);
+    printf(YELLOW "%p\n" RESET, diff_result);
+    TreeDumpDot2(diff_result);
+
+    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{After simplification}\n\n");
     WriteExpressionToTeX(diff_result, tex.buffer_TeX, &(tex.cur_len));
 
     WriteToTexEnd  (node_G, file_tex, &tex);

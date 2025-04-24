@@ -129,7 +129,7 @@ double Eval(Node *node)
             case LN:
                 return log(_ERIGHT);
 
-
+            case UNKNOW:
             default:
                 LOG(LOGL_ERROR,"Error: Unknown operation");
                 return NAN;
@@ -224,6 +224,7 @@ Node* Diff(Node *node)
             case LN:
                 return _DIV(dR, CR);
 
+            case UNKNOW:
             default:
                 LOG(LOGL_ERROR,"Error: Unknown func");
                 return nullptr;
@@ -234,7 +235,7 @@ Node* Diff(Node *node)
     return nullptr;
 }
 
-void Optimize(Node **node) //TODO Rename
+void Simplifications(Node **node) 
 {
     assert(node && *node);
 
@@ -312,6 +313,9 @@ void Replace(Node **node, Node *son)
     if (son == temp->right) temp->right = nullptr;
 
     *node = son;
+
+    if (son) son->parent = temp->parent;
+
     FreeTree(&temp);
 }
 

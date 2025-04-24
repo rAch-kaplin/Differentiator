@@ -125,8 +125,9 @@ static Func GetFuncType(const char* func_name)
         {
             return func[i].func;
         }
-    } // FIXME unknow function
+    }
 
+    return UNKNOW;
 }
 
 static bool IsFunc(const char *name)

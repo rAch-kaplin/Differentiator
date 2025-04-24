@@ -6,8 +6,6 @@
 #include "tree_func.h"
 #include "TeX_dump.h"
 
-const size_t TeX_buffer_size = 4048;
-
 static void WriteNode                  (Node *node, char *buffer_TeX, int *cur_len);
 static void HandleOperationsToTeX      (Node *node, char *buffer_TeX, int *cur_len);
 static void HandleFuncToTeX            (Node *node, char *buffer_TeX, int *cur_len);
@@ -257,6 +255,7 @@ void HandleFuncToTeX(Node *node, char *buffer_TeX, int *cur_len)
             break;
         }
 
+        case UNKNOW:
         default:
         {
             LOG(LOGL_ERROR, "UNKNOW FUNCTION");

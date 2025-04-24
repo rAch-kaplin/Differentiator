@@ -4,6 +4,8 @@
 #include "tree_func.h"
 #include "diff_tree.h"
 
+const size_t TeX_buffer_size = 4048;
+
 #define _WRITE_NODE_TEX(buffer_TeX, cur_len, ...)                                         \
     do {                                                                                  \
         if ((size_t)*(cur_len) < TeX_buffer_size) {                                       \
