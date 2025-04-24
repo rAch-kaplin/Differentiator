@@ -11,7 +11,6 @@
 #define _VAR(x) NewNode(VAR, (NodeValue){.var = (x)}, nullptr, nullptr)
 
 #define OP_VALUE(oper)   NodeValue {.op   = (oper)}
-// #define FUNC_VALUE(func) NodeValue {.func = (func)}
 
 #define _FUNC(func_type, arg) NewNode(FUNC,  (NodeValue){.func = (func_type)}, nullptr, arg)
 #define _OP(op, a, b) NewNode(OP, (NodeValue){.op = (op)}, a, b)
@@ -21,12 +20,16 @@
 #define _MUL(a, b) NewNode(OP, OP_VALUE(MUL), a, b)
 #define _DIV(a, b) NewNode(OP, OP_VALUE(DIV), a, b)
 #define _POW(a, b) NewNode(OP, OP_VALUE(POW), a, b)
-// #define _COS(b)    NewNode(FUNC, FUNC_VALUE(COS), nullptr, b)
-// #define _SIN(b)    NewNode(FUNC, FUNC_VALUE(SIN), nullptr, b)
-// #define _LOG(b)    NewNode(FUNC, FUNC_VALUE( LN), nullptr, b)
+
+
 #define _COS(b)    NewNode(FUNC, NodeValue {.func = (COS)}, nullptr, b)
 #define _SIN(b)    NewNode(FUNC, NodeValue {.func = (SIN)}, nullptr, b)
 #define _LOG(b)    NewNode(FUNC, NodeValue {.func = ( LN)}, nullptr, b)
+
+#define _SH(b)     NewNode(FUNC, NodeValue {.func = (SH)},  nullptr, b)
+#define _CH(b)     NewNode(FUNC, NodeValue {.func = (CH)},  nullptr, b)
+
+#define _SQRT(b)   _POW((b), _NUM(0.5))
 
 #define dL  Diff(node->left)
 #define dR  Diff(node->right)

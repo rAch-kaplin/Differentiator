@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
-#include <cmath>
+#include <math.h>
 #include <stdlib.h>
 
 #include "file_read.h"
@@ -26,8 +26,6 @@ bool IsNum(const Node *node);
 
 const double EPSILON = 1e-10;
 const size_t MAX_VARS = 10;
-
-//#define _LOG(b)    NewNode(FUNC, NodeValue {.func = (LN)}, nullptr, b)
 
 Variable* GetVarsTable() //TODO struct
 {
@@ -92,17 +90,8 @@ double Eval(Node *node)
     if (node->type == VAR) return Global_x;
     if (node->type == OP)
     {
-
-    /**************************************************************************************************************************
-        In this project you can see the use of DSL rules. The project uses this as an experiment
-        (for training purposes). It is better not to use it here, because not so many conditions need to be checked,
-        also it is used in one file. In this case you should not do that, keep another file with rules.
-    ****************************************************************************************************************************/
-
-        #define DEF_OPER(oper, eval_rule, ...) case oper: return eval_rule;
         switch (node->value.op)
         {
-            // #include "diff_rules_DSL.h"
             case ADD: return _ELEFT + _ERIGHT;
             case SUB: return _ELEFT - _ERIGHT;
             case MUL: return _ELEFT * _ERIGHT;
@@ -113,28 +102,35 @@ double Eval(Node *node)
                 LOG(LOGL_ERROR,"Error: Unknown operation");
                 return NAN;
         }
-        #undef DEF_OPER
     }
     if (node->type == FUNC)
     {
-        #define DEF_FUNC(func, eval_rule, ...) case func: return eval_rule;
         switch (node->value.func)
         {
-            // #include "diff_rules_DSL.h"
-
-            case SIN:
-                return sin(_ERIGHT);
-            case COS:
-                return cos(_ERIGHT);
-            case LN:
-                return log(_ERIGHT);
+            case SIN:       return      sin(_ERIGHT);
+            case COS:       return      cos(_ERIGHT);
+            case LN:        return      log(_ERIGHT);
+            // case EXP:       return      exp(_ERIGHT);
+            case TG:        return      tan(_ERIGHT);
+            case CTG:       return 1.0 / tan(_ERIGHT);
+            case SH:        return      sinh(_ERIGHT);
+            case CH:        return      cosh(_ERIGHT);
+            case TH:        return      tanh(_ERIGHT);
+            case CTH:       return 1.0 / tanh(_ERIGHT);
+            case ARCSIN:    return      asin(_ERIGHT);
+            case ARCCOS:    return      acos(_ERIGHT);
+            case ARCTG:     return      atan(_ERIGHT);
+            case ARCCTG:    return M_PI_2 - atan(_ERIGHT);
+            case ARCSH:     return      asinh(_ERIGHT);
+            case ARCCH:     return      acosh(_ERIGHT);
+            case ARCTH:     return      atanh(_ERIGHT);
+            case ARCCTH:    return      atanh(1.0 / _ERIGHT);
 
             case UNKNOW:
             default:
                 LOG(LOGL_ERROR,"Error: Unknown operation");
                 return NAN;
         }
-        #undef DEF_FUNC
     }
 
     LOG(LOGL_ERROR, "Error: Unknown node type");
@@ -166,13 +162,9 @@ Node* Diff(Node *node)
 
     if (node->type == OP)
     {
-        #define DEF_OPER(oper, eval_rule, diff_rule, ...) case oper: diff_rule;
-
         LOG(LOGL_ERROR,"OP: %d", node->value.op);
         switch (node->value.op)
         {
-            // #include "diff_rules_DSL.h"
-
             case ADD:
                 return _ADD(dL, dR);
             case SUB:
@@ -206,47 +198,68 @@ Node* Diff(Node *node)
                 LOG(LOGL_ERROR,"Error: Unknown operation %d", node->value.op);
                 return nullptr;
         }
-        #undef DEF_OPER
     }
     if (node->type == FUNC)
     {
-        #define DEF_FUNC(func, eval_rule, diff_rule, ...) case func: diff_rule
-
         LOG(LOGL_ERROR,"FUNC: %d", node->value.func);
         switch (node->value.func)
         {
-            // #include "diff_rules_DSL.h"
-
             case SIN:
                 return _MUL(_COS(CR), dR);
             case COS:
                 return _MUL(_MUL(_NUM(-1), _SIN(CR)), dR);
             case LN:
                 return _DIV(dR, CR);
+            // case EXP:
+            //     return _MUL(_EXP(CR), dR);
+            case TG:
+                return _DIV(dR, _POW(_COS(CR), _NUM(2)));
+            case CTG:
+                return _MUL(_NUM(-1), _DIV(dR, _POW(_SIN(CR), _NUM(2))));
+            case SH:
+                return _MUL(_CH(CR), dR);
+            case CH:
+                return _MUL(_SH(CR), dR);
+            case TH:
+                return _DIV(dR, _POW(_CH(CR), _NUM(2)));
+            case CTH:
+                return _MUL(_NUM(-1), _DIV(dR, _POW(_SH(CR), _NUM(2))));
+            case ARCSIN:
+                return _DIV(dR, _SQRT(_SUB(_NUM(1), _POW(CR, _NUM(2)))));
+            case ARCCOS:
+                return _MUL(_NUM(-1), _DIV(dR, _SQRT(_SUB(_NUM(1), _POW(CR, _NUM(2))))));
+            case ARCTG:
+                // return _DIV(dR, _ADD(_NUM(1), _POW(CR, _NUM(2))));
+                return _DIV(_NUM(1), _ADD(_MUL(dL, dL), _NUM(1)));
+            case ARCCTG:
+                return _MUL(_NUM(-1), _DIV(dR, _ADD(_NUM(1), _POW(CR, _NUM(2)))));
+            case ARCSH:
+                return _DIV(dR, _SQRT(_ADD(_POW(CR, _NUM(2)), _NUM(1))));
+            case ARCCH:
+                return _DIV(dR, _SQRT(_SUB(_POW(CR, _NUM(2)), _NUM(1))));
+            case ARCTH:
+                return _DIV(dR, _SUB(_NUM(1), _POW(CR, _NUM(2))));
+            case ARCCTH:
+                return _MUL(_NUM(-1), _DIV(dR, _SUB(_NUM(1), _POW(CR, _NUM(2)))));
 
             case UNKNOW:
             default:
                 LOG(LOGL_ERROR,"Error: Unknown func");
                 return nullptr;
         }
-        #undef DEF_FUNC
     }
 
     return nullptr;
 }
 
-void Simplifications(Node **node) 
+void Simplifications(Node **node)
 {
     assert(node && *node);
 
-    bool changed = false;
-
     do
     {
-        changed |= ConstFolding(*node);
-        changed |= RemoveNeutralElems(node);
 
-    } while (!changed);
+    } while (ConstFolding(*node) | RemoveNeutralElems(node));
 }
 
 bool ConstFolding(Node *node)

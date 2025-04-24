@@ -33,8 +33,28 @@ enum Op
 
 enum Func
 {
-    SIN, COS, LN, UNKNOW
+    SIN,
+    COS,
+    LN,
+    //EXP,
+    TG,
+    CTG,
+    SH,
+    CH,
+    TH,
+    CTH,
+    ARCSIN,
+    ARCCOS,
+    ARCTG,
+    ARCCTG,
+    ARCSH,
+    ARCCH,
+    ARCTH,
+    ARCCTH,
+
+    UNKNOW
 };
+
 
 /*************************NODE******************************************************************************/
 
@@ -88,11 +108,26 @@ typedef struct Function
     const char* name;
 } Function;
 
-static const Function func[] =
+const Function func[] =
 {
-    {SIN, "sin"},
-    {COS, "cos"},
-    { LN,  "ln"}
+    {SIN,    "sin"},
+    {COS,    "cos"},
+    {LN,     "ln"},
+    //{EXP,    "exp"},
+    {TG,     "tg"},
+    {CTG,    "ctg"},
+    {SH,     "sh"},
+    {CH,     "ch"},
+    {TH,     "th"},
+    {CTH,    "cth"},
+    {ARCSIN, "arcsin"},
+    {ARCCOS, "arccos"},
+    {ARCTG,  "arctg"},
+    {ARCCTG, "arcctg"},
+    {ARCSH,  "arcsh"},
+    {ARCCH,  "arcch"},
+    {ARCTH,  "arcth"},
+    {ARCCTH, "arccth"}
 };
 
 const size_t size_of_func = sizeof(func) / sizeof(func[0]);

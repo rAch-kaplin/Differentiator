@@ -21,6 +21,8 @@ void FreeVarsTable();
 
 //   (3 * x^2) ^ (1/2) + sin ( ln ( cos (x^2) ) )$
 
+// ch(x + 1) + arctg((x^2 + 1) / x) + sin(x) * ln(x + 2) + 1 / (x^2 + 2)$
+
 int main(int argc, const char* argv[]) //TODO not const
 {
     printf(GREEN "\nStart main! ============================================================================\n\n" RESET);
@@ -68,8 +70,8 @@ int main(int argc, const char* argv[]) //TODO not const
     _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{Original expression}\n\n");
     WriteExpressionToTeX(node_G, tex.buffer_TeX, &(tex.cur_len));
 
-    Simplifications(&node_G);
-    TreeDumpDot2(node_G);
+    // Simplifications(&node_G);
+    // TreeDumpDot2(node_G);
 
     Node *diff_node = CopyTree(node_G);
     Node *diff_result = Diff(diff_node);

@@ -134,7 +134,11 @@ static bool IsFunc(const char *name)
 {
     assert(name);
 
-    const char *functions[] = {"sin", "cos", "tan", "ln"};
+    const char *functions[] = {
+                                "sin", "cos", "tan", "ln",
+                                "ch", "sh", "th", "cth",
+                                "arcsin", "arccos", "arctg", "arcctg",
+                                "arcsh", "arcch", "arcth"                };
 
     for (size_t i = 0; i < sizeof(functions) / sizeof(functions[0]); i++)
     {
