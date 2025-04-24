@@ -11,7 +11,7 @@
 
 const size_t size_op = 32;
 const size_t PNG_NAME_SIZE = 64;
-const size_t BUFFER_SIZE = 32768;
+const size_t BUFFER_SIZE = 327680;
 const size_t command_buf = 512;
 
 const char* GetNodeLabel(const Node* node);

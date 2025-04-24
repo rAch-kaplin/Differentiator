@@ -64,9 +64,9 @@ int main(int argc, const char* argv[]) //TODO not const
     TeX tex = {};
 
     WriteToTexStart(node_G, file_tex, &tex);
-    WriteToTexEnd  (node_G, file_tex, &tex);
+    WriteExpressionToTeX(node_G, tex.buffer_TeX, &(tex.cur_len));
 
-    Optimize(&node_G);
+    //Optimize(&node_G);
     TreeDumpDot2(node_G);
 
     Node *diff_node = CopyTree(node_G);
@@ -79,9 +79,13 @@ int main(int argc, const char* argv[]) //TODO not const
         FreeTree(&node_G);
         return -1;
     }
-    TreeDumpDot2(diff_result);
-    Optimize(&diff_result);
-    TreeDumpDot2(diff_result);
+    //TreeDumpDot(diff_result);
+    //Optimize(&diff_result);
+    //TreeDumpDot(diff_result);
+
+    WriteExpressionToTeX(diff_result, tex.buffer_TeX, &(tex.cur_len));
+
+    WriteToTexEnd  (node_G, file_tex, &tex);
 
     FreeTree(&diff_node);
     FreeTree(&diff_result);
