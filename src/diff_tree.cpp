@@ -139,7 +139,7 @@ double Eval(Node *node)
 
 Node* CopyTree(Node *root)
 {
-    assert(root);
+    assert(root != nullptr);
 
     Node* node = NewNode(root->type, root->value, nullptr, nullptr);
 
@@ -229,7 +229,6 @@ Node* Diff(Node *node)
             case ARCCOS:
                 return _MUL(_NUM(-1), _DIV(dR, _SQRT(_SUB(_NUM(1), _POW(CR, _NUM(2))))));
             case ARCTG:
-                // return _DIV(dR, _ADD(_NUM(1), _POW(CR, _NUM(2))));
                 return _DIV(_NUM(1), _ADD(_MUL(dL, dL), _NUM(1)));
             case ARCCTG:
                 return _MUL(_NUM(-1), _DIV(dR, _ADD(_NUM(1), _POW(CR, _NUM(2)))));

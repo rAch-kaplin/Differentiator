@@ -61,7 +61,7 @@ int main(int argc, const char* argv[]) //TODO not const
         fprintf(stderr, "ERROR! check log file\n");
     }
 
-    TreeDumpDot2(node_G);
+    TreeDumpDot(node_G);
 
     TeX tex = {};
 
@@ -69,9 +69,6 @@ int main(int argc, const char* argv[]) //TODO not const
 
     _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{Original expression}\n\n");
     WriteExpressionToTeX(node_G, tex.buffer_TeX, &(tex.cur_len));
-
-    // Simplifications(&node_G);
-    // TreeDumpDot2(node_G);
 
     Node *diff_node = CopyTree(node_G);
     Node *diff_result = Diff(diff_node);

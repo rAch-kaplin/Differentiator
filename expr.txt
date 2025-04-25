@@ -1,4 +1,4 @@
-(x^2 + 1) / x $
+ch(x + 1) + arcsin((x^2 + 1) / x) + sin(x) * ln(x + 2)  $
 
 
 

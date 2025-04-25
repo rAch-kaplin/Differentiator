@@ -143,7 +143,6 @@ void HandleOperationsToTeX(Node *node, char *buffer_TeX, int *cur_len)
     switch (node->value.op)
     {
         case ADD:
-        case SUB:
         {
             if (need_parentheses)
             {
@@ -158,6 +157,37 @@ void HandleOperationsToTeX(Node *node, char *buffer_TeX, int *cur_len)
             {
                 _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\right)");
             }
+            break;
+        }
+
+        case SUB:
+        {
+            if (need_parentheses)
+            {
+                _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\left(");
+            }
+
+            WriteNode(node->left, buffer_TeX, cur_len);
+            _WRITE_NODE_TEX(buffer_TeX, cur_len, "{-}");
+
+            bool right_is_op = (node->right->type == OP);
+            if (right_is_op)
+            {
+                _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\left(");
+            }
+
+            WriteNode(node->right, buffer_TeX, cur_len);
+
+            if (right_is_op)
+            {
+                _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\right)");
+            }
+
+            if (need_parentheses)
+            {
+                _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\right)");
+            }
+
             break;
         }
 
@@ -267,9 +297,9 @@ void HandleFuncToTeX(Node *node, char *buffer_TeX, int *cur_len)
 
         case LN:
         {
-            _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\ln{");
+            _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\ln{\\left(");
             WriteNode(node->right, buffer_TeX, cur_len);
-            _WRITE_NODE_TEX(buffer_TeX, cur_len, "}");
+            _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\right)}");
             break;
         }
 
