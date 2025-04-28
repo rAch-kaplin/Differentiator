@@ -7,7 +7,7 @@ Node* NewNode(NodeType type, NodeValue value, Node* left, Node* right);
 CodeError CreateNode(Node **dest, const char *data, Node *parent);
 NodeType DetectNodeType(const char *str);
 
-CodeError TreeDumpDot(Node* root);
+CodeError TreeDumpDot (Node* root);
 CodeError TreeDumpDot2(Node* root);
 
 void FreeTree(Node** node);

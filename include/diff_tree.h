@@ -77,12 +77,15 @@ typedef struct Node
     struct Node* parent;
 } Node;
 
+/*************************VARIABLES******************************************************************************/
+
 typedef struct Variable
 {
     char *name;
     size_t len_name;
 } Variable;
 
+/*************************OPERATIONS******************************************************************************/
 
 typedef struct Operation
 {
@@ -101,6 +104,8 @@ static const Operation operations[] =
 };
 
 const size_t size_of_operations = sizeof(operations) / sizeof(operations[0]);
+
+/*************************FUNCS******************************************************************************/
 
 typedef struct Function
 {
@@ -132,15 +137,20 @@ const Function func[] =
 
 const size_t size_of_func = sizeof(func) / sizeof(func[0]);
 
+/***********************************************************************************************************/
+
 double Eval(Node *node);
 Node* Diff(Node *node);
-Node* CopyTree(Node *root);
 
+Node* CopyTree(Node *root);
 bool CheckVars(Node* node);
 
 Variable* GetVarsTable();
 size_t LookupVar(Variable *vars_table, const char* name, size_t len_name);
 size_t AddVartable(Variable *vars_table, const char* name, size_t len_name);
+void FreeVarsTable();
+
 void Simplifications(Node **node);
+void FixTree(Node* node);
 
 #endif //_DIFF_TREE

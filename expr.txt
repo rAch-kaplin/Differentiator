@@ -1,5 +1,4 @@
-ch(x + 1) + arcsin((x^2 + 1) / x) + sin(x) * ln(x + 2)  $
-
+ch(x + 1) + arctg((x^2 + 1) / x) + sin(x) * ln(x + 2) $
 
 
 

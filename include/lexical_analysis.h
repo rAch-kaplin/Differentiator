@@ -2,7 +2,6 @@
 #define _LEXICAL_ANALYSIS
 
 #include "diff_tree.h"
-// #include "diff_rules_DSL.h"
 
 typedef enum LexemeType
 {
@@ -28,9 +27,9 @@ typedef struct Lexeme
     } value;
 } Lexeme;
 
-Lexeme* StringToLexemes(const char *str);
-void PrintLexemes(const Lexeme *lexeme_array, size_t lexeme_count);
-Lexeme* InitLexemeArray(const char* file_expr, size_t *lexeme_count);
-void DeinitLexemes(Lexeme* lexeme_array);
+Lexeme*     StringToLexemes(const char *str);
+Lexeme*     InitLexemeArray(const char* file_expr, size_t *lexeme_count);
+void        PrintLexemes(const Lexeme *lexeme_array, size_t lexeme_count);
+void        DeinitLexemes(Lexeme* lexeme_array);
 
 #endif // _LEXICAL_ANALYSIS

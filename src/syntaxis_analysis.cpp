@@ -7,6 +7,11 @@
 #include "logger.h"
 #include "diff_DSL.h"
 
+static Node* GetE(Lexeme *lexeme_array, size_t *cur);
+static Node* GetT(Lexeme *lexeme_array, size_t *cur);
+static Node* GetD(Lexeme *lexeme_array, size_t *cur);
+static Node* GetP(Lexeme *lexeme_array, size_t *cur);
+
 Node* GetG(Lexeme *lexeme_array, size_t *cur)
 {
     assert(lexeme_array);

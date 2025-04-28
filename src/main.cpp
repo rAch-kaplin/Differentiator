@@ -10,17 +10,13 @@
 #include "logger.h"
 #include "lexical_analysis.h"
 #include "syntaxis_analysis.h"
-
 #include "arg_parser.h"
 #include "colors.h"
-
 #include "TeX_dump.h"
 
 const size_t MAX_VARS = 10;
-void FreeVarsTable();
 
 //   (3 * x^2) ^ (1/2) + sin ( ln ( cos (x^2) ) )$
-
 // ch(x + 1) + arctg((x^2 + 1) / x) + sin(x) * ln(x + 2) + 1 / (x^2 + 2)$
 
 int main(int argc, const char* argv[]) //TODO not const
@@ -61,7 +57,7 @@ int main(int argc, const char* argv[]) //TODO not const
         fprintf(stderr, "ERROR! check log file\n");
     }
 
-    TreeDumpDot(node_G);
+    TreeDumpDot2(node_G);
 
     TeX tex = {};
 
@@ -80,14 +76,13 @@ int main(int argc, const char* argv[]) //TODO not const
         FreeTree(&node_G);
         return -1;
     }
+    FixTree(diff_result);
 
     _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{After differentiation}\n\n");
     WriteExpressionToTeX(diff_result, tex.buffer_TeX, &(tex.cur_len));
 
     TreeDumpDot2(diff_result);
-    printf(YELLOW "%p\n" RESET, diff_result);
     Simplifications(&diff_result);
-    printf(YELLOW "%p\n" RESET, diff_result);
     TreeDumpDot2(diff_result);
 
     _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{After simplification}\n\n");
@@ -97,8 +92,6 @@ int main(int argc, const char* argv[]) //TODO not const
 
     FreeTree(&diff_node);
     FreeTree(&diff_result);
-
-    printf("%lg\n", Eval(node_G));
 
     FreeTree(&node_G);
     FreeVarsTable();
@@ -110,19 +103,4 @@ int main(int argc, const char* argv[]) //TODO not const
     printf(MAGENTA "Execution time: %f seconds\n\n" RESET, time_spent);
 
     printf(GREEN "End main! ==============================================================================\n\n" RESET);
-}
-
-void FreeVarsTable()
-{
-    Variable* vars_table = GetVarsTable();
-
-    for (size_t i = 0; i < MAX_VARS; i++)
-    {
-        LOG(LOGL_DEBUG, "free ---> %s ", vars_table[i].name);
-        if (vars_table[i].name != nullptr)
-        {
-            free((vars_table[i].name));
-            vars_table[i].name = nullptr;
-        }
-    }
 }

@@ -21,7 +21,7 @@ Node* ReadExpression(const char *file_expr)
         LOG(LOGL_ERROR, "Lexeme_array was not allocated");
         return nullptr;
     }
-    PrintLexemes(lexeme_array, lexeme_count);
+    //PrintLexemes(lexeme_array, lexeme_count);
 
     size_t cur = 0;
     Node *node_G = GetG(lexeme_array, &cur);

@@ -99,7 +99,7 @@ void WriteExpressionToTeX(Node *root, char *buffer_TeX, int *cur_len)
 
 }
 
-void WriteNode(Node *node, char *buffer_TeX, int *cur_len)
+static void WriteNode(Node *node, char *buffer_TeX, int *cur_len)
 {
     assert(node);
     assert(buffer_TeX);
@@ -129,7 +129,7 @@ void WriteNode(Node *node, char *buffer_TeX, int *cur_len)
     }
 }
 
-void HandleOperationsToTeX(Node *node, char *buffer_TeX, int *cur_len)
+static void HandleOperationsToTeX(Node *node, char *buffer_TeX, int *cur_len)
 {
     assert(node);
     assert(buffer_TeX);
@@ -259,7 +259,7 @@ void HandleOperationsToTeX(Node *node, char *buffer_TeX, int *cur_len)
     }
 }
 
-int GetOpPriority(Op op)
+static int GetOpPriority(Op op)
 {
     switch(op)
     {
@@ -271,7 +271,7 @@ int GetOpPriority(Op op)
     }
 }
 
-void HandleFuncToTeX(Node *node, char *buffer_TeX, int *cur_len)
+static void HandleFuncToTeX(Node *node, char *buffer_TeX, int *cur_len)
 {
     assert(node);
     assert(buffer_TeX);
@@ -424,7 +424,7 @@ void HandleFuncToTeX(Node *node, char *buffer_TeX, int *cur_len)
     }
 }
 
-void HandleNumToTeX(Node *node, char *buffer_TeX, int *cur_len)
+static void HandleNumToTeX(Node *node, char *buffer_TeX, int *cur_len)
 {
     assert(node);
     assert(buffer_TeX);
@@ -433,7 +433,7 @@ void HandleNumToTeX(Node *node, char *buffer_TeX, int *cur_len)
     _WRITE_NODE_TEX(buffer_TeX, cur_len, "{%lg}", node->value.num);
 }
 
-void HandleVarToTeX(Node *node, char *buffer_TeX, int *cur_len)
+static void HandleVarToTeX(Node *node, char *buffer_TeX, int *cur_len)
 {
     assert(node);
     assert(buffer_TeX);

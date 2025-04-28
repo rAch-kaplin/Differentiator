@@ -8,11 +8,12 @@
 #include "colors.h"
 
 const size_t lexeme_array_size = 1000;
+
 bool GetOperation(Lexeme *lexeme_array, size_t lexeme_count, const char **cur);
 void SkipSpaces(const char **buffer);
 
 static void AddLexeme(Lexeme *lexeme_array, size_t *lexeme_count, LexemeType type, double value);
-static bool IsNum(const char *cur);
+static bool IsNum (const char *cur);
 static bool IsFunc(const char *name);
 static Func GetFuncType(const char* func_name);
 
@@ -138,7 +139,7 @@ static bool IsFunc(const char *name)
                                 "sin", "cos", "tan", "ln",
                                 "ch", "sh", "th", "cth",
                                 "arcsin", "arccos", "arctg", "arcctg",
-                                "arcsh", "arcch", "arcth"                };
+                                "arcsh", "arcch", "arcth"                }; //FIXME (have struct with func)
 
     for (size_t i = 0; i < sizeof(functions) / sizeof(functions[0]); i++)
     {

@@ -9,28 +9,65 @@
 #include "diff_DSL.h"
 #include "logger.h"
 
-bool ConstFolding(Node *node);
-bool RemoveNeutralElems(Node **node);
-void Replace(Node **node, Node *son);
+static void Replace(Node **node, Node *son);
+static void ReplaceWithOne(Node **node);
 
-bool AddOptimisation(Node **node);
-bool SubOptimisation(Node **node);
-bool MulOptimisation(Node **node);
-bool DivOptimisation(Node **node);
-bool PowOptimisation(Node **node);
-bool CompareDoubles(double value1, double value2);
+static bool ConstFolding(Node *node);
+static bool RemoveNeutralElems(Node **node);
 
-void ReplaceWithOne(Node **node);
+static bool AddOptimisation(Node **node);
+static bool SubOptimisation(Node **node);
+static bool MulOptimisation(Node **node);
+static bool DivOptimisation(Node **node);
+static bool PowOptimisation(Node **node);
 
-bool IsNum(const Node *node);
+static bool CompareDoubles(double value1, double value2);
+
+static bool IsNum(const Node *node);
+
+void FixParents(Node* node);
 
 const double EPSILON = 1e-10;
 const size_t MAX_VARS = 10;
+
+void FixParents(Node* node)
+{
+    assert(node);
+
+    if (node->left)  (node->left)->parent  = node;
+    if (node->right) (node->right)->parent = node;
+}
+
+void FixTree(Node* node)
+{
+    LOG(LOGL_DEBUG, "FixParent node: %p", node);
+    if (!node) return;
+
+    FixParents(node);
+
+    if (node->left)  FixTree(node->left);
+    if (node->right) FixTree(node->right);
+}
 
 Variable* GetVarsTable() //TODO struct
 {
     static Variable vars_table[MAX_VARS] = {};
     return vars_table;
+}
+
+void FreeVarsTable()
+{
+    Variable* vars_table = GetVarsTable();
+
+    for (size_t i = 0; i < MAX_VARS; i++)
+    {
+        LOG(LOGL_DEBUG, "free ---> %s ", vars_table[i].name);
+        if (vars_table[i].name != nullptr)
+        {
+            free((vars_table[i].name));
+            vars_table[i].name = nullptr;
+        }
+    }
 }
 
 size_t LookupVar(Variable *vars_table, const char* name, size_t len_name)
@@ -78,7 +115,7 @@ bool CheckVars(Node* node)
 
 bool CompareDoubles(double value1, double value2)
 {
-    return fabs(value1 - value2) < EPSILON;;
+    return fabs(value1 - value2) < EPSILON;
 }
 
 double Eval(Node *node)
@@ -229,9 +266,9 @@ Node* Diff(Node *node)
             case ARCCOS:
                 return _MUL(_NUM(-1), _DIV(dR, _SQRT(_SUB(_NUM(1), _POW(CR, _NUM(2))))));
             case ARCTG:
-                return _DIV(_NUM(1), _ADD(_MUL(dL, dL), _NUM(1)));
+                return _DIV(dR, _ADD(_POW(CR, _NUM(2)), _NUM(1)));
             case ARCCTG:
-                return _MUL(_NUM(-1), _DIV(dR, _ADD(_NUM(1), _POW(CR, _NUM(2)))));
+                return _MUL(_NUM(-1), _DIV(dR, _ADD(_POW(CR, _NUM(2)), _NUM(1))));
             case ARCSH:
                 return _DIV(dR, _SQRT(_ADD(_POW(CR, _NUM(2)), _NUM(1))));
             case ARCCH:
@@ -259,9 +296,11 @@ void Simplifications(Node **node)
     {
 
     } while (ConstFolding(*node) | RemoveNeutralElems(node));
+
+    FixTree(*node);
 }
 
-bool ConstFolding(Node *node)
+static bool ConstFolding(Node *node)
 {
     assert(node);
     bool changed = false;
@@ -287,7 +326,7 @@ bool ConstFolding(Node *node)
     return changed;
 }
 
-bool RemoveNeutralElems(Node **node)
+static bool RemoveNeutralElems(Node **node)
 {
     assert(node && *node);
 
@@ -315,7 +354,7 @@ bool RemoveNeutralElems(Node **node)
     return changed;
 }
 
-void Replace(Node **node, Node *son)
+static void Replace(Node **node, Node *son)
 {
     assert(node && *node);
 
@@ -331,12 +370,12 @@ void Replace(Node **node, Node *son)
     FreeTree(&temp);
 }
 
-bool IsNum(const Node *node)
+static bool IsNum(const Node *node)
 {
     return node != nullptr && node->type == NUM;
 }
 
-bool AddOptimisation(Node **node)
+static bool AddOptimisation(Node **node)
 {
     assert(node && *node);
 
@@ -354,7 +393,7 @@ bool AddOptimisation(Node **node)
     return false;
 }
 
-bool SubOptimisation(Node **node)
+static bool SubOptimisation(Node **node)
 {
     assert(node && *node);
 
@@ -367,7 +406,7 @@ bool SubOptimisation(Node **node)
     return false;
 }
 
-bool MulOptimisation(Node **node)
+static bool MulOptimisation(Node **node)
 {
     assert(node && *node);
 
@@ -402,7 +441,7 @@ bool MulOptimisation(Node **node)
     return false;
 }
 
-bool DivOptimisation(Node **node)
+static bool DivOptimisation(Node **node)
 {
     assert(node && *node);
 
@@ -423,7 +462,7 @@ bool DivOptimisation(Node **node)
     return false;
 }
 
-bool PowOptimisation(Node **node)
+static bool PowOptimisation(Node **node)
 {
     assert(node && *node);
 
@@ -453,7 +492,7 @@ bool PowOptimisation(Node **node)
     return false;
 }
 
-void ReplaceWithOne(Node **node)
+static void ReplaceWithOne(Node **node)
 {
     assert(node);
 
