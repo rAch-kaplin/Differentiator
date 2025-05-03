@@ -4,7 +4,7 @@
 #include "tree_func.h"
 #include "diff_tree.h"
 
-const size_t TeX_buffer_size = 4048;
+const size_t TeX_buffer_size = 16048;
 
 #define _WRITE_NODE_TEX(buffer_TeX, cur_len, ...)                                         \
     do {                                                                                  \
@@ -24,5 +24,6 @@ typedef struct
 void WriteToTexStart(Node *root, const char* filename_tex, TeX *tex);
 void WriteExpressionToTeX(Node *root, char *buffer_TeX, int *cur_len);
 void WriteToTexEnd  (Node *root, const char* filename_tex, TeX *tex);
+void WriteTotalDifferentialTeX(char* tex_buffer, size_t* cur_len, Node** partials, size_t num_vars);
 
 #endif // _TeX_DUMP

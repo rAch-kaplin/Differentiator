@@ -212,10 +212,6 @@ static void HandleOperationsToTeX(Node *node, char *buffer_TeX, int *cur_len)
 
         case DIV:
         {
-            if (need_parentheses)
-            {
-                _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\left(");
-            }
 
             _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\frac{");
             WriteNode(node->left, buffer_TeX, cur_len);
@@ -223,10 +219,6 @@ static void HandleOperationsToTeX(Node *node, char *buffer_TeX, int *cur_len)
             WriteNode(node->right, buffer_TeX, cur_len);
             _WRITE_NODE_TEX(buffer_TeX, cur_len, "}");
 
-            if (need_parentheses)
-            {
-                _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\right)");
-            }
             break;
         }
 
@@ -455,3 +447,5 @@ static void HandleVarToTeX(Node *node, char *buffer_TeX, int *cur_len)
         LOG(LOGL_ERROR, "VAR was not find");
     }
 }
+
+

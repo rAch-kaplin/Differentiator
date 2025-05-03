@@ -55,7 +55,6 @@ enum Func
     UNKNOW
 };
 
-
 /*************************NODE******************************************************************************/
 
 union NodeValue
@@ -140,7 +139,8 @@ const size_t size_of_func = sizeof(func) / sizeof(func[0]);
 /***********************************************************************************************************/
 
 double Eval(Node *node);
-Node* Diff(Node *node);
+Node* Diff    (Node *node, const char* diff_var);
+Node** DiffAll(Node* expr, size_t* num_vars_out);
 
 Node* CopyTree(Node *root);
 bool CheckVars(Node* node);

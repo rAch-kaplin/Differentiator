@@ -186,16 +186,21 @@ Node* CopyTree(Node *root)
     return node;
 }
 
-Node* Diff(Node *node)
+Node* Diff(Node *node, const char* diff_var)
 {
     assert(node);
 
     LOG(LOGL_DEBUG, "Diff node");
-    if (node->type == NUM) return _NUM(0);
-    LOG(LOGL_DEBUG,"NUM: %d", node->value.num);
 
-    if (node->type == VAR) return _NUM(1);
-    LOG(LOGL_DEBUG,"VAR: %d", node->value.var);
+    if (node->type == NUM)
+        return _NUM(0);
+
+    size_t var_id = LookupVar(GetVarsTable(), diff_var, 1);
+
+    if (node->type == VAR)
+        return var_id == node->value.var ? _NUM(1) : _NUM(0);
+
+    LOG(LOGL_DEBUG, "VAR index: %zu", var_id);
 
     if (node->type == OP)
     {
@@ -203,13 +208,13 @@ Node* Diff(Node *node)
         switch (node->value.op)
         {
             case ADD:
-                return _ADD(dL, dR);
+                return _ADD(dL(diff_var), dR(diff_var)); 
             case SUB:
-                return _SUB(dL, dR);
+                return _SUB(dL(diff_var), dR(diff_var));
             case MUL:
-                return _ADD(_MUL(dL, CR), _MUL(CL, dR));
+                return _ADD(_MUL(dL(diff_var), CR), _MUL(CL, dR(diff_var)));
             case DIV:
-                return _DIV(_SUB(_MUL(dL, CR), _MUL(CL, dR)), _MUL(CR, CR));
+                return _DIV(_SUB(_MUL(dL(diff_var), CR), _MUL(CL, dR(diff_var))), _MUL(CR, CR));
             case POW:
             {
                 bool var_in_base   = CheckVars(node->left);
@@ -217,15 +222,15 @@ Node* Diff(Node *node)
 
                 if (var_in_base && var_in_degree)
                 {
-                    return _MUL(_ADD( _MUL(dR, _LOG(CL)),_DIV(_MUL(dL, CR), CL)), _POW(CL, CR));
+                    return _MUL(_ADD(_MUL(dR(diff_var), _LOG(CL)), _DIV(_MUL(dL(diff_var), CR), CL)), _POW(CL, CR));
                 }
                 if (var_in_base)
                 {
-                    return _MUL(dL,  _MUL(CR, _POW(CL, _SUB(CR, _NUM(1)))));
+                    return _MUL(dL(diff_var), _MUL(CR, _POW(CL, _SUB(CR, _NUM(1)))));
                 }
                 if (var_in_degree)
                 {
-                    return _MUL( _POW(CL, CR),  _MUL(dR, _LOG(CL)));
+                    return _MUL(_POW(CL, CR), _MUL(dR(diff_var), _LOG(CL)));
                 }
 
                 return nullptr;
@@ -236,47 +241,46 @@ Node* Diff(Node *node)
                 return nullptr;
         }
     }
+
     if (node->type == FUNC)
     {
         LOG(LOGL_ERROR,"FUNC: %d", node->value.func);
         switch (node->value.func)
         {
             case SIN:
-                return _MUL(_COS(CR), dR);
+                return _MUL(_COS(CR), dR(diff_var));
             case COS:
-                return _MUL(_MUL(_NUM(-1), _SIN(CR)), dR);
+                return _MUL(_MUL(_NUM(-1), _SIN(CR)), dR(diff_var));
             case LN:
-                return _DIV(dR, CR);
-            // case EXP:
-            //     return _MUL(_EXP(CR), dR);
+                return _DIV(dR(diff_var), CR);
             case TG:
-                return _DIV(dR, _POW(_COS(CR), _NUM(2)));
+                return _DIV(dR(diff_var), _POW(_COS(CR), _NUM(2)));
             case CTG:
-                return _MUL(_NUM(-1), _DIV(dR, _POW(_SIN(CR), _NUM(2))));
+                return _MUL(_NUM(-1), _DIV(dR(diff_var), _POW(_SIN(CR), _NUM(2))));
             case SH:
-                return _MUL(_CH(CR), dR);
+                return _MUL(_CH(CR), dR(diff_var));
             case CH:
-                return _MUL(_SH(CR), dR);
+                return _MUL(_SH(CR), dR(diff_var));
             case TH:
-                return _DIV(dR, _POW(_CH(CR), _NUM(2)));
+                return _DIV(dR(diff_var), _POW(_CH(CR), _NUM(2)));
             case CTH:
-                return _MUL(_NUM(-1), _DIV(dR, _POW(_SH(CR), _NUM(2))));
+                return _MUL(_NUM(-1), _DIV(dR(diff_var), _POW(_SH(CR), _NUM(2))));
             case ARCSIN:
-                return _DIV(dR, _SQRT(_SUB(_NUM(1), _POW(CR, _NUM(2)))));
+                return _DIV(dR(diff_var), _SQRT(_SUB(_NUM(1), _POW(CR, _NUM(2)))));
             case ARCCOS:
-                return _MUL(_NUM(-1), _DIV(dR, _SQRT(_SUB(_NUM(1), _POW(CR, _NUM(2))))));
+                return _MUL(_NUM(-1), _DIV(dR(diff_var), _SQRT(_SUB(_NUM(1), _POW(CR, _NUM(2))))));
             case ARCTG:
-                return _DIV(dR, _ADD(_POW(CR, _NUM(2)), _NUM(1)));
+                return _DIV(dR(diff_var), _ADD(_POW(CR, _NUM(2)), _NUM(1)));
             case ARCCTG:
-                return _MUL(_NUM(-1), _DIV(dR, _ADD(_POW(CR, _NUM(2)), _NUM(1))));
+                return _MUL(_NUM(-1), _DIV(dR(diff_var), _ADD(_POW(CR, _NUM(2)), _NUM(1))));
             case ARCSH:
-                return _DIV(dR, _SQRT(_ADD(_POW(CR, _NUM(2)), _NUM(1))));
+                return _DIV(dR(diff_var), _SQRT(_ADD(_POW(CR, _NUM(2)), _NUM(1))));
             case ARCCH:
-                return _DIV(dR, _SQRT(_SUB(_POW(CR, _NUM(2)), _NUM(1))));
+                return _DIV(dR(diff_var), _SQRT(_SUB(_POW(CR, _NUM(2)), _NUM(1))));
             case ARCTH:
-                return _DIV(dR, _SUB(_NUM(1), _POW(CR, _NUM(2))));
+                return _DIV(dR(diff_var), _SUB(_NUM(1), _POW(CR, _NUM(2))));
             case ARCCTH:
-                return _MUL(_NUM(-1), _DIV(dR, _SUB(_NUM(1), _POW(CR, _NUM(2)))));
+                return _MUL(_NUM(-1), _DIV(dR(diff_var), _SUB(_NUM(1), _POW(CR, _NUM(2)))));
 
             case UNKNOW:
             default:
@@ -286,6 +290,30 @@ Node* Diff(Node *node)
     }
 
     return nullptr;
+}
+
+Node** DiffAll(Node* expr, size_t* num_vars_out)
+{
+    assert(expr);
+
+    Variable* vars_table = GetVarsTable();
+
+    size_t num_vars = 0;
+    while (num_vars < MAX_VARS && vars_table[num_vars].name)
+        num_vars++;
+
+    Node** partials = (Node**)calloc(num_vars, sizeof(Node*));
+    if (!partials) return nullptr;
+
+    for (size_t i = 0; i < num_vars; i++)
+    {
+        partials[i] = Diff(expr, vars_table[i].name);
+    }
+
+    if (num_vars_out)
+        *num_vars_out = num_vars;
+
+    return partials;
 }
 
 void Simplifications(Node **node)

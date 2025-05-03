@@ -31,9 +31,9 @@
 
 #define _SQRT(b)   _POW((b), _NUM(0.5))
 
-#define dL  Diff(node->left)
-#define dR  Diff(node->right)
-#define CL  CopyTree(node->left)
-#define CR  CopyTree(node->right)
+#define dL(var_name)  Diff(node->left, var_name)
+#define dR(var_name)  Diff(node->right, var_name)
+#define CL            CopyTree(node->left)
+#define CR            CopyTree(node->right)
 
 #endif //DIFF_DCL

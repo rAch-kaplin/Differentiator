@@ -1,4 +1,2 @@
-ch(x + 1) + arctg((x^2 + 1) / x) + sin(x) * ln(x + 2) $
-
-
+(3 * t^2) ^ (1/2) + sin ( ln ( cos (x^2) ) )$
 

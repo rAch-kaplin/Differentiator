@@ -19,6 +19,51 @@ const size_t MAX_VARS = 10;
 //   (3 * x^2) ^ (1/2) + sin ( ln ( cos (x^2) ) )$
 // ch(x + 1) + arctg((x^2 + 1) / x) + sin(x) * ln(x + 2) + 1 / (x^2 + 2)$
 
+void GenerateTeXReport(Node* node_G, const char* file_tex)
+{
+    TeX tex = {};
+    WriteToTexStart(node_G, file_tex, &tex);
+
+    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{Original expression}\n\n");
+    WriteExpressionToTeX(node_G, tex.buffer_TeX, &(tex.cur_len));
+
+    Node *diff_node = CopyTree(node_G);
+    Node *diff_result = Diff(diff_node, "x");
+    FixTree(diff_result);
+
+    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{After differentiation}\n\n");
+    WriteExpressionToTeX(diff_result, tex.buffer_TeX, &(tex.cur_len));
+
+    Simplifications(&diff_result);
+    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{After simplification}\n\n");
+    WriteExpressionToTeX(diff_result, tex.buffer_TeX, &(tex.cur_len));
+
+    size_t num_vars = 0;
+    Node** partials = DiffAll(node_G, &num_vars);
+
+    if (partials)
+    {
+        _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{Partial derivatives}\n\n");
+
+        Variable* vars_table = GetVarsTable();
+        for (size_t i = 0; i < num_vars; i++)
+        {
+           _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len),
+                    "\\subsection*{$\\frac{\\partial f}{\\partial %s}$}\n\n", vars_table[i].name);
+            Simplifications(&partials[i]);
+            WriteExpressionToTeX(partials[i], tex.buffer_TeX, &(tex.cur_len));
+            FreeTree(&partials[i]);
+        }
+        free(partials);
+    }
+
+    WriteToTexEnd(node_G, file_tex, &tex);
+
+    FreeTree(&diff_node);
+    FreeTree(&diff_result);
+}
+
+
 int main(int argc, const char* argv[]) //TODO not const
 {
     printf(GREEN "\nStart main! ============================================================================\n\n" RESET);
@@ -59,39 +104,8 @@ int main(int argc, const char* argv[]) //TODO not const
 
     TreeDumpDot2(node_G);
 
-    TeX tex = {};
+    GenerateTeXReport(node_G, file_tex);
 
-    WriteToTexStart(node_G, file_tex, &tex);
-
-    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{Original expression}\n\n");
-    WriteExpressionToTeX(node_G, tex.buffer_TeX, &(tex.cur_len));
-
-    Node *diff_node = CopyTree(node_G);
-    Node *diff_result = Diff(diff_node);
-    if (diff_result == nullptr)
-    {
-        fprintf(stderr, "Diff() return nullptr node\n");
-        FreeTree(&diff_node);
-        FreeTree(&diff_result);
-        FreeTree(&node_G);  
-        return -1;
-    }
-    FixTree(diff_result);
-
-    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{After differentiation}\n\n");
-    WriteExpressionToTeX(diff_result, tex.buffer_TeX, &(tex.cur_len));
-
-    TreeDumpDot2(diff_result);
-    Simplifications(&diff_result);
-    TreeDumpDot2(diff_result);
-
-    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{After simplification}\n\n");
-    WriteExpressionToTeX(diff_result, tex.buffer_TeX, &(tex.cur_len));
-
-    WriteToTexEnd  (node_G, file_tex, &tex);
-
-    FreeTree(&diff_node);
-    FreeTree(&diff_result);
 
     FreeTree(&node_G);
     FreeVarsTable();
