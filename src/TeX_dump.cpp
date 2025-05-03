@@ -135,6 +135,7 @@ static void HandleOperationsToTeX(Node *node, char *buffer_TeX, int *cur_len)
     assert(buffer_TeX);
     assert(cur_len);
 
+    //FIXME func()
     bool is_in_exponent = (node->parent && node->parent->type == OP && node->parent->value.op == POW);
     bool need_parentheses = (!is_in_exponent && node->parent &&
                            (node->parent->type == OP) &&
@@ -277,7 +278,7 @@ static void HandleFuncToTeX(Node *node, char *buffer_TeX, int *cur_len)
     assert(buffer_TeX);
     assert(cur_len);
 
-    switch (node->value.func)
+    switch (node->value.func) //TODO handle FUNC for tex
     {
         case SIN:
         {

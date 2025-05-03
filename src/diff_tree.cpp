@@ -192,14 +192,14 @@ Node* Diff(Node *node)
 
     LOG(LOGL_DEBUG, "Diff node");
     if (node->type == NUM) return _NUM(0);
-    LOG(LOGL_ERROR,"NUM: %d", node->value.num);
+    LOG(LOGL_DEBUG,"NUM: %d", node->value.num);
 
     if (node->type == VAR) return _NUM(1);
-    LOG(LOGL_ERROR,"VAR: %d", node->value.var);
+    LOG(LOGL_DEBUG,"VAR: %d", node->value.var);
 
     if (node->type == OP)
     {
-        LOG(LOGL_ERROR,"OP: %d", node->value.op);
+        LOG(LOGL_DEBUG,"OP: %d", node->value.op);
         switch (node->value.op)
         {
             case ADD:

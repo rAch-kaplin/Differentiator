@@ -73,7 +73,7 @@ int main(int argc, const char* argv[]) //TODO not const
         fprintf(stderr, "Diff() return nullptr node\n");
         FreeTree(&diff_node);
         FreeTree(&diff_result);
-        FreeTree(&node_G);
+        FreeTree(&node_G);  
         return -1;
     }
     FixTree(diff_result);
