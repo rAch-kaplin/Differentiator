@@ -23,7 +23,9 @@ typedef struct
 
 void WriteToTexStart(Node *root, const char* filename_tex, TeX *tex);
 void WriteExpressionToTeX(Node *root, char *buffer_TeX, int *cur_len);
+void WriteExpressionToTeX2(Node *root, char *buffer_TeX, int *cur_len);
 void WriteToTexEnd  (Node *root, const char* filename_tex, TeX *tex);
 void WriteTotalDifferentialTeX(char* tex_buffer, size_t* cur_len, Node** partials, size_t num_vars);
+void GenerateTeXReport(Node* node_G, const char* file_tex);
 
 #endif // _TeX_DUMP

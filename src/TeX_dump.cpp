@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
+#include <cmath>
+#include <math.h>
 
 #include "logger.h"
 #include "diff_tree.h"
@@ -12,6 +14,102 @@ static void HandleFuncToTeX            (Node *node, char *buffer_TeX, int *cur_l
 static void HandleNumToTeX             (Node *node, char *buffer_TeX, int *cur_len);
 static void HandleVarToTeX             (Node *node, char *buffer_TeX, int *cur_len);
 static int  GetOpPriority              (Op op);
+
+static void WriteFullDifferential   (Node *node, TeX *tex);
+static void WritePartialDerivatives (Node* expr, TeX *tex);
+
+const int Global_x = 0;
+
+void GenerateTeXReport(Node* node_G, const char* file_tex)
+{
+    TeX tex = {};
+
+    WriteToTexStart(node_G, file_tex, &tex);
+
+    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{Original expression}\n\n");
+    WriteExpressionToTeX(node_G, tex.buffer_TeX, &(tex.cur_len));
+
+    Node *diff_node = CopyTree(node_G);
+    if (diff_node == nullptr)
+    {
+        LOG(LOGL_ERROR, "diff_node = (nil)"); //FIXME
+        return;
+    }
+
+    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\subsection*{The full differential of the expression}\n\n");
+    WriteFullDifferential(diff_node, &tex);
+
+    _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{Partial derivatives}\n\n");
+    WritePartialDerivatives(diff_node, &tex);
+
+    WriteToTexEnd(node_G, file_tex, &tex);
+    FreeTree(&diff_node);
+}
+
+void WriteFullDifferential(Node *node, TeX *tex)
+{
+    size_t num_vars = 0;
+    Node** partials = DiffAll(node, &num_vars);
+
+    if (partials)
+    {
+        Variable* vars_table = GetVarsTable();
+        _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\[\n\\mathrm{d}f = ");
+
+        for (size_t i = 0; i < num_vars; i++)
+        {
+            TreeDumpDot2(partials[i]);
+            Simplifications(&partials[i]);
+            TreeDumpDot2(partials[i]);
+            _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\left[");
+            WriteExpressionToTeX2(partials[i], tex->buffer_TeX, &(tex->cur_len));
+            _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\right]\\mathrm{d}%s", vars_table[i].name);
+
+            if (i + 1 < num_vars)
+                _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), " + ");
+        }
+
+        _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\]\n");
+
+        for (size_t i = 0; i < num_vars; ++i)
+            FreeTree(&partials[i]);
+        free(partials);
+    }
+}
+
+void WritePartialDerivatives(Node* expr, TeX *tex)
+{
+    size_t num_vars = 0;
+    Node** partials = DiffAll(expr, &num_vars);
+    if (!partials) return;
+
+    Variable* vars_table = GetVarsTable();
+
+    _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len),
+    "\\begin{itemize}\n");
+
+    for (size_t i = 0; i < num_vars; i++)
+    {
+        Simplifications(&partials[i]);
+
+        _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len),
+            "\\item Partial derivative of по $%s$:\n", vars_table[i].name);
+
+        _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len),
+            "\\[\n\\frac{\\partial f}{\\partial %s} = ", vars_table[i].name);
+
+        WriteExpressionToTeX2(partials[i], tex->buffer_TeX, &(tex->cur_len));
+
+        _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\n\\]");
+
+        FreeTree(&partials[i]);
+    }
+
+    _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len),
+        "\\end{itemize}\n");
+
+    free(partials);
+}
 
 void WriteToTexStart(Node *root, const char* filename_tex, TeX *tex)
 {
@@ -96,7 +194,14 @@ void WriteExpressionToTeX(Node *root, char *buffer_TeX, int *cur_len)
     WriteNode(root, buffer_TeX, cur_len);
     _WRITE_NODE_TEX(buffer_TeX, cur_len, "\\]");
     _WRITE_NODE_TEX(buffer_TeX, cur_len, "\n\n");
+}
 
+void WriteExpressionToTeX2(Node *root, char *buffer_TeX, int *cur_len)
+{
+    assert(root);
+
+    WriteNode(root, buffer_TeX, cur_len);
+    _WRITE_NODE_TEX(buffer_TeX, cur_len, "\n");
 }
 
 static void WriteNode(Node *node, char *buffer_TeX, int *cur_len)
@@ -104,6 +209,7 @@ static void WriteNode(Node *node, char *buffer_TeX, int *cur_len)
     assert(node);
     assert(buffer_TeX);
     assert(cur_len);
+    LOG(LOGL_DEBUG, "\nWriteNode: <%p> \n", node);
 
     switch (node->type)
     {

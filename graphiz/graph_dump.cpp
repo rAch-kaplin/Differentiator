@@ -100,6 +100,7 @@ const char* GetNodeColor(const Node* node)
 
 CodeError TreeDumpDot(Node* root)
 {
+    assert(root);
     static int dump_counter = 0;
 
     char* buffer = (char*)calloc(BUFFER_SIZE, sizeof(char));

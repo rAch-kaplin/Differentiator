@@ -22,7 +22,6 @@ static bool DivOptimisation(Node **node);
 static bool PowOptimisation(Node **node);
 
 static bool CompareDoubles(double value1, double value2);
-
 static bool IsNum(const Node *node);
 
 void FixParents(Node* node);
@@ -109,9 +108,30 @@ bool CheckVars(Node* node)
     if (node->type == NUM) return false;
     if (node->type == OP || node->type == FUNC)
         return CheckVars(node->left) || CheckVars(node->right);
+
     return false;
 }
 
+bool ContainsVar(Node* node, const char* var_name)
+{
+    if (!node)  return false;
+
+    if (node->type == VAR)
+    {
+        size_t var_id = LookupVar(GetVarsTable(), var_name, 1); //FIXME
+
+        //printf("var_name: %s, in table(%zu): %s \n", var_name, node->value.var, GetVarsTable()[node->value.var].name);
+        return (strcmp(var_name, GetVarsTable()[var_id].name) == 0);
+    }
+
+    if (node->type == NUM)
+        return false;
+
+    if (node->type == OP || node->type == FUNC)
+        return ContainsVar(node->left, var_name) || ContainsVar(node->right, var_name);
+
+    return false;
+}
 
 bool CompareDoubles(double value1, double value2)
 {
@@ -124,7 +144,7 @@ double Eval(Node *node)
 
     LOG(LOGL_DEBUG, "Eval node");
     if (node->type == NUM) return node->value.num;
-    if (node->type == VAR) return Global_x;
+    if (node->type == VAR) return Global_X;
     if (node->type == OP)
     {
         switch (node->value.op)
@@ -208,7 +228,7 @@ Node* Diff(Node *node, const char* diff_var)
         switch (node->value.op)
         {
             case ADD:
-                return _ADD(dL(diff_var), dR(diff_var)); 
+                return _ADD(dL(diff_var), dR(diff_var));
             case SUB:
                 return _SUB(dL(diff_var), dR(diff_var));
             case MUL:
@@ -217,8 +237,9 @@ Node* Diff(Node *node, const char* diff_var)
                 return _DIV(_SUB(_MUL(dL(diff_var), CR), _MUL(CL, dR(diff_var))), _MUL(CR, CR));
             case POW:
             {
-                bool var_in_base   = CheckVars(node->left);
-                bool var_in_degree = CheckVars(node->right);
+
+                bool var_in_base   = ContainsVar(node->left,  diff_var);
+                bool var_in_degree = ContainsVar(node->right, diff_var);
 
                 if (var_in_base && var_in_degree)
                 {
@@ -244,7 +265,7 @@ Node* Diff(Node *node, const char* diff_var)
 
     if (node->type == FUNC)
     {
-        LOG(LOGL_ERROR,"FUNC: %d", node->value.func);
+        LOG(LOGL_DEBUG,"FUNC: %d", node->value.func);
         switch (node->value.func)
         {
             case SIN:

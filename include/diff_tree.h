@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-const double Global_x = 2.0;
+const double Global_X = 2.0;
 
 enum CodeError
 {
@@ -144,6 +144,7 @@ Node** DiffAll(Node* expr, size_t* num_vars_out);
 
 Node* CopyTree(Node *root);
 bool CheckVars(Node* node);
+bool ContainsVar(Node* node, const char* var_name);
 
 Variable* GetVarsTable();
 size_t LookupVar(Variable *vars_table, const char* name, size_t len_name);
