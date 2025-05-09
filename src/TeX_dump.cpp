@@ -15,8 +15,8 @@ static void HandleNumToTeX             (Node *node, char *buffer_TeX, int *cur_l
 static void HandleVarToTeX             (Node *node, char *buffer_TeX, int *cur_len);
 static int  GetOpPriority              (Op op);
 
-static void WriteFullDifferential   (Node *node, TeX *tex);
-static void WritePartialDerivatives (Node* expr, TeX *tex);
+static void WriteFullDifferential   (Node **partials, size_t num_vars, TeX *tex);
+static void WritePartialDerivatives (Node **partials, size_t num_vars, TeX *tex);
 
 const int Global_x = 0;
 
@@ -36,53 +36,51 @@ void GenerateTeXReport(Node* node_G, const char* file_tex)
         return;
     }
 
+    size_t num_vars = 0;
+    Node** partials = DiffAll(diff_node, &num_vars);
+    if (!partials)
+    {
+        FreeTree(&diff_node);
+        return;
+    }
+
     _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\subsection*{The full differential of the expression}\n\n");
-    WriteFullDifferential(diff_node, &tex);
+    WriteFullDifferential(partials, num_vars, &tex);
 
     _WRITE_NODE_TEX(tex.buffer_TeX, &(tex.cur_len), "\\section*{Partial derivatives}\n\n");
-    WritePartialDerivatives(diff_node, &tex);
+    WritePartialDerivatives(partials, num_vars, &tex);
 
     WriteToTexEnd(node_G, file_tex, &tex);
+
+    for (size_t i = 0; i < num_vars; ++i)
+        FreeTree(&partials[i]);
+    free(partials);
     FreeTree(&diff_node);
 }
 
-void WriteFullDifferential(Node *node, TeX *tex)
+void WriteFullDifferential(Node **partials, size_t num_vars, TeX *tex)
 {
-    size_t num_vars = 0;
-    Node** partials = DiffAll(node, &num_vars);
+    Variable* vars_table = GetVarsTable();
+    _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\[\n\\mathrm{d}f = ");
 
-    if (partials)
+    for (size_t i = 0; i < num_vars; i++)
     {
-        Variable* vars_table = GetVarsTable();
-        _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\[\n\\mathrm{d}f = ");
+        TreeDumpDot2(partials[i]);
+        Simplifications(&partials[i]);
+        TreeDumpDot2(partials[i]);
+        _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\left[");
+        WriteExpressionToTeX2(partials[i], tex->buffer_TeX, &(tex->cur_len));
+        _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\right]\\mathrm{d}%s", vars_table[i].name);
 
-        for (size_t i = 0; i < num_vars; i++)
-        {
-            TreeDumpDot2(partials[i]);
-            Simplifications(&partials[i]);
-            TreeDumpDot2(partials[i]);
-            _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\left[");
-            WriteExpressionToTeX2(partials[i], tex->buffer_TeX, &(tex->cur_len));
-            _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\right]\\mathrm{d}%s", vars_table[i].name);
-
-            if (i + 1 < num_vars)
-                _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), " + ");
-        }
-
-        _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\]\n");
-
-        for (size_t i = 0; i < num_vars; ++i)
-            FreeTree(&partials[i]);
-        free(partials);
+        if (i + 1 < num_vars)
+            _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), " + ");
     }
+
+    _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\\]\n");
 }
 
-void WritePartialDerivatives(Node* expr, TeX *tex)
+void WritePartialDerivatives(Node **partials, size_t num_vars, TeX *tex)
 {
-    size_t num_vars = 0;
-    Node** partials = DiffAll(expr, &num_vars);
-    if (!partials) return;
-
     Variable* vars_table = GetVarsTable();
 
     _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len),
@@ -101,14 +99,10 @@ void WritePartialDerivatives(Node* expr, TeX *tex)
         WriteExpressionToTeX2(partials[i], tex->buffer_TeX, &(tex->cur_len));
 
         _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len), "\n\\]");
-
-        FreeTree(&partials[i]);
     }
 
     _WRITE_NODE_TEX(tex->buffer_TeX, &(tex->cur_len),
         "\\end{itemize}\n");
-
-    free(partials);
 }
 
 void WriteToTexStart(Node *root, const char* filename_tex, TeX *tex)
