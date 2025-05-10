@@ -10,12 +10,12 @@ CXXFLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-l
            -flto-odr-type-merging -fno-omit-frame-pointer -Wstack-usage=8192 -pie -fPIE -Werror=vla \
 		  -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
-INCLUDES = -I./include -I./libs/logger -I./libs/arg_parser -I./common 
+INCLUDES = -I./include -I./libs/logger -I./libs/arg_parser -I./common
 
 BUILD_DIR = build
 EXECUTABLE = do
 
-SOURCES = src/main.cpp src/file_read.cpp src/tree_func.cpp src/diff_tree.cpp graphiz/graph_dump.cpp src/lexical_analysis.cpp src/syntaxis_analysis.cpp src/TeX_dump.cpp
+SOURCES = src/main.cpp src/file_read.cpp src/tree_func.cpp src/diff_tree.cpp graphviz/graph_dump.cpp src/lexical_analysis.cpp src/syntaxis_analysis.cpp src/TeX_dump.cpp
 
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SOURCES:%.cpp=%.o))
 DEPENDS = $(OBJECTS:.o=.d)

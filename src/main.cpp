@@ -57,6 +57,7 @@ int main(int argc, const char* argv[]) //TODO not const
         fprintf(stderr, "ERROR! check log file\n");
     }
 
+    TreeDumpDot2 (node_G);
     GenerateTeXReport(node_G, file_tex);
 
     FreeTree(&node_G);

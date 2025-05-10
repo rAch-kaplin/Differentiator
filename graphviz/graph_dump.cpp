@@ -120,7 +120,7 @@ CodeError TreeDumpDot(Node* root)
 
     buffer_len += snprintf(buffer + buffer_len, BUFFER_SIZE - (size_t)buffer_len, "}\n");
 
-    FILE* file = fopen("graphiz/dot/dump.dot", "w+");
+    FILE* file = fopen("graphviz/dot/dump.dot", "w+");
     if (!file)
     {
         fprintf(stderr, "Cannot open dot file\n");
@@ -132,13 +132,13 @@ CodeError TreeDumpDot(Node* root)
     fclose(file);
     free(buffer);
 
-    system("mkdir -p graphiz/img graphiz/dot");
+    system("mkdir -p graphviz/img graphviz/dot");
 
     char png_name[PNG_NAME_SIZE] = {};
-    snprintf(png_name, sizeof(png_name), "graphiz/img/dump_%d.png", dump_counter++);
+    snprintf(png_name, sizeof(png_name), "graphviz/img/dump_%d.png", dump_counter++);
 
     char command[command_buf] = {};
-    snprintf(command, sizeof(command), "dot -Tpng graphiz/dot/dump.dot -o %s", png_name);
+    snprintf(command, sizeof(command), "dot -Tpng graphviz/dot/dump.dot -o %s", png_name);
     system(command);
 
     return OK;
@@ -230,7 +230,7 @@ CodeError TreeDumpDot2(Node* root)
     buffer_len += snprintf(buffer + buffer_len, BUFFER_SIZE - (size_t)buffer_len, "}\n");
 
 
-    FILE* file = fopen("graphiz/dot/dump2.dot", "w+");
+    FILE* file = fopen("graphviz/dot/dump2.dot", "w+");
     if (!file)
     {
         fprintf(stderr, "Cannot open dot file\n");
@@ -242,13 +242,13 @@ CodeError TreeDumpDot2(Node* root)
     fclose(file);
     free(buffer);
 
-    system("mkdir -p graphiz/img graphiz/dot");
+    system("mkdir -p graphviz/img graphviz/dot");
 
     char png_name[PNG_NAME_SIZE] = {};
-    snprintf(png_name, sizeof(png_name), "graphiz/img/dump2_%d.png", dump_counter++);
+    snprintf(png_name, sizeof(png_name), "graphviz/img/dump2_%d.png", dump_counter++);
 
     char command[command_buf] = {};
-    snprintf(command, sizeof(command), "dot -Tpng graphiz/dot/dump2.dot -o %s", png_name);
+    snprintf(command, sizeof(command), "dot -Tpng graphviz/dot/dump2.dot -o %s", png_name);
     system(command);
 
     return OK;
